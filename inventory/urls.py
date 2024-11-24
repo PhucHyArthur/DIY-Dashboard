@@ -3,6 +3,7 @@ from .views import RawMaterialView, FinishedProductView
 
 urlpatterns = [
     # Raw Materials
+    path('raw_materials/', RawMaterialView.as_view({'get': 'list'}), name='raw-materials-list'),
     path('raw_materials/add/', RawMaterialView.as_view({'post': 'create'}), name='raw-materials-add'),
     path('raw_materials/detail/<int:pk>/', RawMaterialView.as_view({'get': 'retrieve'}), name='raw-materials-detail'),
     path('raw_materials/edit/<int:pk>/', RawMaterialView.as_view({'put': 'update'}), name='raw-materials-edit'),
