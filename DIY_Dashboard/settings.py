@@ -134,20 +134,20 @@ OAUTH2_PROVIDER = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # OAuth2 Authentication
-        'rest_framework_simplejwt.authentication.JWTAuthentication',    # JWT Authentication
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  
+        'rest_framework_simplejwt.authentication.JWTAuthentication',   
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',  # Chỉ cho phép người dùng đã xác thực
+        'rest_framework.permissions.IsAuthenticated',  
     ),
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token truy cập có hiệu lực trong 60 phút
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Token làm mới có hiệu lực trong 7 ngày
-    'ROTATE_REFRESH_TOKENS': True,                  # Tự động thay đổi refresh token sau mỗi lần sử dụng
-    'BLACKLIST_AFTER_ROTATION': True,               # Vô hiệu hóa refresh token sau khi được xoay
-    'AUTH_HEADER_TYPES': ('Bearer',),               # Loại tiêu đề cho JWT
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     
+    'ROTATE_REFRESH_TOKENS': True,                  
+    'BLACKLIST_AFTER_ROTATION': True,              
+    'AUTH_HEADER_TYPES': ('Bearer',),               
 }
 
 MIDDLEWARE = [
