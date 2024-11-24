@@ -13,7 +13,7 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class BaseMaterialView(ViewSet):
+class BaseInventoryView(ViewSet):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [CustomTokenMatchesOASRequirements]
     model = None
@@ -84,7 +84,7 @@ class BaseMaterialView(ViewSet):
         return Response({"message": f"Deleted object with ID {pk}."}, status=204)
 
 
-class RawMaterialView(BaseMaterialView):
+class RawMaterialView(BaseInventoryView):
     model = RawMaterials
     serializer_class = RawMaterialsSerializer
     required_alternate_scopes = {
@@ -95,7 +95,7 @@ class RawMaterialView(BaseMaterialView):
     }
 
 
-class FinishedProductView(BaseMaterialView):
+class FinishedProductView(BaseInventoryView):
     model = FinishedProducts
     serializer_class = FinishedProductsSerializer
     required_alternate_scopes = {
