@@ -54,6 +54,8 @@ INSTALLED_APPS = [
 ]
 
 OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_CLASS': 'users.views.CustomAccessToken',
+    'ACCESS_TOKEN_MODEL': 'users.CustomAccessToken', 
     'SCOPES': {
         #users
         'users_create': 'Create users',
@@ -132,6 +134,10 @@ OAUTH2_PROVIDER = {
     }
 }
 
+AUTH_USER_MODEL = 'users.Employee'
+
+LOGIN_URL = '/api/auth/login/'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  
@@ -158,7 +164,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
 ]
+
+# AUTHENTICATION_BACKENDS = [
+#     'oauth2_provider.backends.OAuth2Backend'
+# ]
 
 ROOT_URLCONF = "DIY_Dashboard.urls"
 
@@ -188,8 +199,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'diy_company',
-        'USER': 'myuser',
-        'PASSWORD': '123456',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }

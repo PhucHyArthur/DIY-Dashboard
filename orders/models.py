@@ -1,12 +1,12 @@
 from django.db import models
-from db_diy.models import Clients
+from users.models import Customer
 from inventory.models import FinishedProducts, RawMaterials
 from suppliers.models import Suppliers
 
 class SalesOrder(models.Model):
     id = models.AutoField(primary_key=True)
     order_number = models.CharField(max_length=255, unique=True)
-    client = models.ForeignKey(Clients, on_delete=models.CASCADE)
+    client = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateField()
     due_date = models.DateField()
     status = models.CharField(max_length=100)

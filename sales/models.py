@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from inventory.models import FinishedProducts
+from django.conf import settings
 
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="carts")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="carts")
     is_active = models.BooleanField(default=True)  
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True) 
@@ -35,7 +36,7 @@ class Cart_Line(models.Model):
 
 
 class Favorites(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
     created_at = models.DateTimeField(auto_now_add=True) 
 
     def __str__(self):
