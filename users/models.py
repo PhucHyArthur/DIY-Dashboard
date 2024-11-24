@@ -34,6 +34,8 @@ class Employee(models.Model):
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="customer")
+    username = models.CharField(max_length=255, unique=True)
+    password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
