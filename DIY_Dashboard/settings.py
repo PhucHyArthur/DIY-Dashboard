@@ -52,10 +52,10 @@ INSTALLED_APPS = [
     'common',
     'warehouse',
 ]
-
+DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
+DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
 OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_CLASS': 'users.views.CustomAccessToken',
-    'ACCESS_TOKEN_MODEL': 'users.CustomAccessToken', 
+    'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
         #users
         'users_create': 'Create users',
@@ -126,11 +126,11 @@ OAUTH2_PROVIDER = {
         'warehouse_update': 'Update warehouse items',
         'warehouse_delete': 'Delete warehouse items',
 
-        # Scopes cho app representatives
-        'representatives_create': 'Create representatives',
-        'representatives_read': 'Read representatives',
-        'representatives_update': 'Update representatives',
-        'representatives_delete': 'Delete representatives',
+        # Scopes cho app supplier
+        'suppliers_create': 'Create suppliers',
+        'suppliers_read': 'Read suppliers',
+        'suppliers_update': 'Update suppliers',
+        'suppliers_delete': 'Delete suppliers',
     }
 }
 
@@ -141,11 +141,10 @@ LOGIN_URL = '/api/auth/login/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  
-        'rest_framework_simplejwt.authentication.JWTAuthentication',   
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',  
-    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',  
+    # ),
 }
 
 SIMPLE_JWT = {
@@ -198,9 +197,9 @@ WSGI_APPLICATION = "DIY_Dashboard.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diy_company',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
+        'NAME': 'diy_erp_company',
+        'USER': 'myuser',
+        'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
     }
