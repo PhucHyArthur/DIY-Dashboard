@@ -1,106 +1,150 @@
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope
+from rest_framework.response import Response
+from rest_framework import status
+
 from .models import RawMaterials, FinishedProducts
 from .serializers import RawMaterialsSerializer, FinishedProductsSerializer
-from rest_framework.viewsets import ViewSet
-from rest_framework.response import Response
-from DIY_Dashboard.permissions import CustomTokenMatchesOASRequirements
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication
-from django.http import Http404
-from rest_framework.pagination import PageNumberPagination
 
 
-class CustomPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
-
-class BaseInventoryView(ViewSet):
+# Raw Materials Views
+class ListRawMaterialsView(APIView):
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [CustomTokenMatchesOASRequirements]
-    model = None
-    serializer_class = None
-    required_alternate_scopes = {}
+    permission_classes = [TokenHasScope]
+    required_scopes = ['raw_materials_read']
 
-    def get_object(self, pk):
-        try:
-            return self.model.objects.get(pk=pk)
-        except self.model.DoesNotExist:
-            raise Http404(f"Object with ID {pk} does not exist.")
+    def get(self, request, *args, **kwargs):
+        raw_materials = RawMaterials.objects.filter(is_deleted=False)
+        data = RawMaterialsSerializer(raw_materials, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
 
-    def list(self, request):
-        queryset = self.model.objects.all()
 
-        # Filtering
-        name = request.query_params.get('name', None)
-        unit = request.query_params.get('unit', None)
+class RetrieveRawMaterialView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['raw_materials_read']
 
-        if name:
-            queryset = queryset.filter(name__icontains=name)
-        if unit:
-            queryset = queryset.filter(unit__icontains=unit)
+    def get(self, request, pk, *args, **kwargs):
+        raw_material = RawMaterials.objects.filter(pk=pk, is_deleted=False).first()
+        if not raw_material:
+            return Response({"error": "Raw material not found."}, status=status.HTTP_404_NOT_FOUND)
+        data = RawMaterialsSerializer(raw_material).data
+        return Response(data, status=status.HTTP_200_OK)
 
-        paginator = CustomPagination()
-        paginated_queryset = paginator.paginate_queryset(queryset, request)
-        serializer = self.serializer_class(paginated_queryset, many=True)
-        return paginator.get_paginated_response(serializer.data)
 
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
+class CreateRawMaterialView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['raw_materials_create']
+
+    def post(self, request, *args, **kwargs):
+        serializer = RawMaterialsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({
-                "message": "Created successfully.",
-                "data": serializer.data
-            }, status=201)
-        return Response({
-            "message": "Failed to create.",
-            "errors": serializer.errors
-        }, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, request, pk=None):
-        obj = self.get_object(pk)
-        serializer = self.serializer_class(obj)
-        return Response({
-            "message": "Retrieved successfully.",
-            "data": serializer.data
-        })
 
-    def update(self, request, pk=None):
-        obj = self.get_object(pk)
-        serializer = self.serializer_class(obj, data=request.data)
+class UpdateRawMaterialView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['raw_materials_update']
+
+    def put(self, request, pk, *args, **kwargs):
+        raw_material = RawMaterials.objects.filter(pk=pk).first()
+        if not raw_material:
+            return Response({"error": "Raw material not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = RawMaterialsSerializer(raw_material, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({
-                "message": "Updated successfully.",
-                "data": serializer.data
-            })
-        return Response({
-            "message": "Failed to update.",
-            "errors": serializer.errors
-        }, status=400)
-
-    def destroy(self, request, pk=None):
-        obj = self.get_object(pk)
-        obj.delete()
-        return Response({"message": f"Deleted object with ID {pk}."}, status=204)
+            return Response({"message": f"Raw material {raw_material.name} updated successfully."},
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RawMaterialView(BaseInventoryView):
-    model = RawMaterials
-    serializer_class = RawMaterialsSerializer
-    required_alternate_scopes = {
-        'POST': [['raw_materials_create']],
-        'GET': [['raw_materials_read']],
-        'PUT': [['raw_materials_update']],
-        'DELETE': [['raw_materials_delete']],
-    }
+class DeleteRawMaterialView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['raw_materials_delete']
+
+    def delete(self, request, pk, *args, **kwargs):
+        raw_material = RawMaterials.objects.filter(pk=pk).first()
+        if not raw_material:
+            return Response({"error": "Raw material not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        raw_material.is_deleted = True
+        raw_material.save()
+        return Response({"message": "Raw material deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
-class FinishedProductView(BaseInventoryView):
-    model = FinishedProducts
-    serializer_class = FinishedProductsSerializer
-    required_alternate_scopes = {
-        'POST': [['finished_products_create']],
-        'GET': [['finished_products_read']],
-        'PUT': [['finished_products_update']],
-        'DELETE': [['finished_products_delete']],
-    }
+# Finished Products Views
+class ListFinishedProductsView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['finished_products_read']
+
+    def get(self, request, *args, **kwargs):
+        finished_products = FinishedProducts.objects.filter(is_deleted=False)
+        data = FinishedProductsSerializer(finished_products, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class RetrieveFinishedProductView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['finished_products_read']
+
+    def get(self, request, pk, *args, **kwargs):
+        finished_product = FinishedProducts.objects.filter(pk=pk, is_deleted=False).first()
+        if not finished_product:
+            return Response({"error": "Finished product not found."}, status=status.HTTP_404_NOT_FOUND)
+        data = FinishedProductsSerializer(finished_product).data
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class CreateFinishedProductView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['finished_products_create']
+
+    def post(self, request, *args, **kwargs):
+        serializer = FinishedProductsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateFinishedProductView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['finished_products_update']
+
+    def put(self, request, pk, *args, **kwargs):
+        finished_product = FinishedProducts.objects.filter(pk=pk).first()
+        if not finished_product:
+            return Response({"error": "Finished product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FinishedProductsSerializer(finished_product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": f"Finished product {finished_product.name} updated successfully."},
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteFinishedProductView(APIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope]
+    required_scopes = ['finished_products_delete']
+
+    def delete(self, request, pk, *args, **kwargs):
+        finished_product = FinishedProducts.objects.filter(pk=pk).first()
+        if not finished_product:
+            return Response({"error": "Finished product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        finished_product.is_deleted = True
+        finished_product.save()
+        return Response({"message": "Finished product deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
