@@ -7,28 +7,28 @@ class WarehouseSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'capacity', 'description', 'is_deleted', 'is_fulled']
 
 class ZoneSerializer(serializers.ModelSerializer):
-    warehouse = WarehouseSerializer()
+    warehouse = serializers.PrimaryKeyRelatedField(queryset=Warehouse.objects.all(), default=1)
 
     class Meta:
         model = Zone
         fields = ['id', 'warehouse', 'name', 'capacity', 'description', 'is_deleted', 'is_fulled']
 
 class AisleSerializer(serializers.ModelSerializer):
-    zone = ZoneSerializer()
+    zone = serializers.PrimaryKeyRelatedField(queryset=Zone.objects.all(), default=1)  # Zone ID instead of full details
 
     class Meta:
         model = Aisle
         fields = ['id', 'zone', 'name', 'capacity', 'description', 'is_deleted', 'is_fulled']
 
 class RackSerializer(serializers.ModelSerializer):
-    aisle = AisleSerializer()
+    aisle = serializers.PrimaryKeyRelatedField(queryset=Aisle.objects.all(), default=1)  # Aisle ID
 
     class Meta:
         model = Rack
         fields = ['id', 'aisle', 'name', 'capacity', 'description', 'is_deleted', 'is_fulled']
 
 class LocationSerializer(serializers.ModelSerializer):
-    rack = RackSerializer()
+    rack = serializers.PrimaryKeyRelatedField(queryset=Rack.objects.all(), default=1)  # Rack ID
 
     class Meta:
         model = Location

@@ -52,8 +52,8 @@ INSTALLED_APPS = [
     'common',
     'warehouse',
 ]
-DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
-DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
+DEFAULT_CLIENT_ID = "2I0CdJCfeVsAfNE6rJsLU85vrrUjkrtRJCY4GV6a"
+DEFAULT_CLIENT_SECRET = "pZGEMlpILMsI1bZV5MbjaWtmaA7GF9w5ZFs2T1lznv0nfRFbXIa2VWnp1fG9nTDJHw7jLNvOFbZJR9JxcaGt8AHkDEHn736jOe1GtjQ9uRx3Masg6J12zoo2IEWYSjtg"
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -105,17 +105,20 @@ OAUTH2_PROVIDER = {
         'purchases_bills_update': 'Update purchases bills',
         'purchases_bills_delete': 'Delete purchases bills',
 
-        #cart
-        'cart_create': 'Create cart',
-        'cart_read': 'Read cart',
-        'cart_update': 'Update cart',
-        'cart_delete': 'Delete cart',
+        #enduser
+        'enduser' : 'all permission in enduser',
 
-        #favorites
-        'favorites_create': 'Create favorites',
-        'favorites_read': 'Read favorites',
-        'favorites_update': 'Update favorites',
-        'favorites_delete': 'Delete favorites',
+        # #cart
+        # 'cart_create': 'Create cart',
+        # 'cart_read': 'Read cart',
+        # 'cart_update': 'Update cart',
+        # 'cart_delete': 'Delete cart',
+
+        # #favorites
+        # 'favorites_create': 'Create favorites',
+        # 'favorites_read': 'Read favorites',
+        # 'favorites_update': 'Update favorites',
+        # 'favorites_delete': 'Delete favorites',
 
         #common
         'common_read': 'Read common resources',
@@ -125,12 +128,6 @@ OAUTH2_PROVIDER = {
         'warehouse_read': 'Read warehouse items',
         'warehouse_update': 'Update warehouse items',
         'warehouse_delete': 'Delete warehouse items',
-
-        # Scopes cho app supplier
-        'suppliers_create': 'Create suppliers',
-        'suppliers_read': 'Read suppliers',
-        'suppliers_update': 'Update suppliers',
-        'suppliers_delete': 'Delete suppliers',
     }
 }
 
@@ -198,7 +195,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'diy_erp_company',
-        'USER': 'myuser',
+        'USER': 'postgres',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
