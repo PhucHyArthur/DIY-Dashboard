@@ -37,7 +37,7 @@ class Zone(models.Model):
     
     def is_capacity_exceeded(self):
         total_rack_capacity = sum(
-            int(Rack.capacity) for aisle in self.racks.all() if not aisle.is_deleted
+            int(rack.capacity) for aisle in self.aisles.all() for rack in aisle.racks.all() if not rack.is_deleted
         )
         return total_rack_capacity > self.capacity
     
@@ -68,7 +68,7 @@ class Rack(models.Model):
     id = models.AutoField(primary_key=True)
     aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, related_name="racks")
     name = models.CharField(max_length=255)
-    capacity = models.CharField(max_length=50)
+    capacity = models.IntegerField() 
     description = models.CharField(max_length=255, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     is_fulled = models.BooleanField(_("Is Fulled"), default=False)
@@ -80,6 +80,7 @@ class Rack(models.Model):
         verbose_name = _("Rack")
         verbose_name_plural = _("Racks")
     
+
 class Location(models.Model):
     id = models.AutoField(primary_key=True)
     rack = models.ForeignKey(Rack, on_delete=models.CASCADE, related_name="locations")
