@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
 
 
 
@@ -55,8 +55,10 @@ INSTALLED_APPS = [
     'warehouse',
     'payment',
 ]
-DEFAULT_CLIENT_ID = "2I0CdJCfeVsAfNE6rJsLU85vrrUjkrtRJCY4GV6a"
-DEFAULT_CLIENT_SECRET = "pZGEMlpILMsI1bZV5MbjaWtmaA7GF9w5ZFs2T1lznv0nfRFbXIa2VWnp1fG9nTDJHw7jLNvOFbZJR9JxcaGt8AHkDEHn736jOe1GtjQ9uRx3Masg6J12zoo2IEWYSjtg"
+
+DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
+DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
+
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -207,7 +209,7 @@ DATABASES = {
         'NAME': 'diy_erp_company',
         'USER': 'postgres',
         'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'HOST': '54.224.77.45',
         'PORT': '5432',
     }
 }
@@ -247,7 +249,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static", 
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static", 
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
