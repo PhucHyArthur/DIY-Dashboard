@@ -11,14 +11,14 @@ class ZoneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Zone
-        fields = ['id', 'warehouse', 'name', 'capacity', 'description', 'is_deleted', 'is_fulled']
+        fields = ['id', 'warehouse', 'name', 'capacity', 'number_of_aisles', 'description', 'is_deleted', 'is_fulled']
 
 class AisleSerializer(serializers.ModelSerializer):
     zone = serializers.PrimaryKeyRelatedField(queryset=Zone.objects.all(), default=1)  # Zone ID instead of full details
 
     class Meta:
         model = Aisle
-        fields = ['id', 'zone', 'name', 'capacity', 'description', 'is_deleted', 'is_fulled']
+        fields = ['id', 'zone', 'name', 'number_of_racks', 'description', 'is_deleted']
 
 class RackSerializer(serializers.ModelSerializer):
     aisle = serializers.PrimaryKeyRelatedField(queryset=Aisle.objects.all(), default=1)  # Aisle ID

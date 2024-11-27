@@ -52,8 +52,8 @@ INSTALLED_APPS = [
     'common',
     'warehouse',
 ]
-DEFAULT_CLIENT_ID = "2I0CdJCfeVsAfNE6rJsLU85vrrUjkrtRJCY4GV6a"
-DEFAULT_CLIENT_SECRET = "pZGEMlpILMsI1bZV5MbjaWtmaA7GF9w5ZFs2T1lznv0nfRFbXIa2VWnp1fG9nTDJHw7jLNvOFbZJR9JxcaGt8AHkDEHn736jOe1GtjQ9uRx3Masg6J12zoo2IEWYSjtg"
+DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
+DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -195,7 +195,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'diy_erp_company',
-        'USER': 'postgres',
+        'USER': 'myuser',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',

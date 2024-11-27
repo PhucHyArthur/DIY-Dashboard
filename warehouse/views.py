@@ -125,6 +125,12 @@ class RegisterAisleView(APIView):
     required_scopes = ['warehouse_create']
 
     def post(self, request, *args, **kwargs):
+        zone_id = request.data.get("zone")
+        zone = Zone.objects.filter(pk=zone_id).first()
+        if not zone:
+            return Response({"error": "Zone not found."}, status=status.HTTP_404_NOT_FOUND)
+        if zone.is_aisles_exceeded():
+            return Response({"error": "Aisles exceeded for this zone."}, status=status.HTTP_400_BAD_REQUEST)
         serializer = AisleSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -180,6 +186,18 @@ class RegisterRackView(APIView):
     required_scopes = ['warehouse_create']
 
     def post(self, request, *args, **kwargs):
+        aisle_id = request.data.get("aisle")
+        aisle = Aisle.objects.filter(pk=aisle_id).first()
+        if not aisle:
+            return Response({"error": "Aisle not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        if aisle.is_racks_exceeded():
+            return Response({"error": "Racks exceeded for this aisle."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        zone = aisle.zone
+        if zone.is_capacity_exceeded():
+            return Response({"error": "Rack capacity exceeded for this zone."}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = RackSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
