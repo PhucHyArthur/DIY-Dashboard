@@ -10,5 +10,5 @@ urlpatterns = [
     path('roles/register/', RegisterRoleView.as_view(), name='register-role'),
     path('roles/', RoleListView.as_view(), name='role-list'),
     path('roles/<int:pk>/', UpdateRoleView.as_view(), name='update-role'),
-    path('roles/<int:pk>/delete/', DeleteRoleView.as_view(), name='delete-role'),
+    path('roles/delete/<int:pk>/', DeleteRoleView.as_view(), name='delete-role'),
 ]
