@@ -29,9 +29,10 @@ class SuppliersCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class SuppliersListView(APIView):
     """
-    API to list suppliers.
+    API to list all suppliers.
     Requires 'suppliers_read' scope.
     """
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
@@ -42,18 +43,16 @@ class SuppliersListView(APIView):
         serializer = SuppliersSerializer(suppliers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class SuppliersDetailView(APIView):
     """
-    API to retrieve, update, or delete a supplier.
-    Requires relevant scopes for each action.
+    API to retrieve a single supplier.
+    Requires 'suppliers_read' scope.
     """
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = []  # Định nghĩa mặc định để tránh lỗi
+    required_scopes = ['suppliers_read']
 
     def get(self, request, pk, *args, **kwargs):
-        # Định nghĩa required_scopes cho GET
-        self.required_scopes = ['suppliers_read']
-        self.check_permissions(request)
         try:
             supplier = Suppliers.objects.get(pk=pk)
             serializer = SuppliersSerializer(supplier)
@@ -61,10 +60,16 @@ class SuppliersDetailView(APIView):
         except Suppliers.DoesNotExist:
             return Response({"error": "Supplier not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
+class SuppliersUpdateView(APIView):
+    """
+    API to update an existing supplier.
+    Requires 'suppliers_update' scope.
+    """
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['suppliers_update']
+
     def put(self, request, pk, *args, **kwargs):
-        # Định nghĩa required_scopes cho PUT
-        self.required_scopes = ['suppliers_update']
-        self.check_permissions(request)
         try:
             supplier = Suppliers.objects.get(pk=pk)
             serializer = SuppliersSerializer(supplier, data=request.data)
@@ -82,10 +87,16 @@ class SuppliersDetailView(APIView):
         except Suppliers.DoesNotExist:
             return Response({"error": "Supplier not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
+class SuppliersDeleteView(APIView):
+    """
+    API to delete a supplier.
+    Requires 'suppliers_delete' scope.
+    """
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['suppliers_delete']
+
     def delete(self, request, pk, *args, **kwargs):
-        # Định nghĩa required_scopes cho DELETE
-        self.required_scopes = ['suppliers_delete']
-        self.check_permissions(request)
         try:
             supplier = Suppliers.objects.get(pk=pk)
             supplier.delete()

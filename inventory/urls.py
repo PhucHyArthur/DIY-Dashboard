@@ -1,17 +1,21 @@
 from django.urls import path
-from .views import RawMaterialView, FinishedProductView
+from .views import (
+    ListRawMaterialsView, RetrieveRawMaterialView, CreateRawMaterialView, UpdateRawMaterialView, DeleteRawMaterialView,
+    ListFinishedProductsView, RetrieveFinishedProductView, CreateFinishedProductView, UpdateFinishedProductView, DeleteFinishedProductView
+)
 
 urlpatterns = [
-    # Raw Materials
-    path('raw_materials/', RawMaterialView.as_view({'get': 'list'}), name='raw-materials-list'),
-    path('raw_materials/add/', RawMaterialView.as_view({'post': 'create'}), name='raw-materials-add'),
-    path('raw_materials/detail/<int:pk>/', RawMaterialView.as_view({'get': 'retrieve'}), name='raw-materials-detail'),
-    path('raw_materials/edit/<int:pk>/', RawMaterialView.as_view({'put': 'update'}), name='raw-materials-edit'),
-    path('raw_materials/delete/<int:pk>/', RawMaterialView.as_view({'delete': 'destroy'}), name='raw-materials-delete'),
+    # Raw Materials URLs
+    path('raw-materials/', ListRawMaterialsView.as_view(), name='list_raw_materials'),
+    path('raw-materials/<int:pk>/', RetrieveRawMaterialView.as_view(), name='retrieve_raw_material'),
+    path('raw-materials/create/', CreateRawMaterialView.as_view(), name='create_raw_material'),
+    path('raw-materials/update/<int:pk>/', UpdateRawMaterialView.as_view(), name='update_raw_material'),
+    path('raw-materials/delete/<int:pk>/', DeleteRawMaterialView.as_view(), name='delete_raw_material'),
 
-    # Finished Products
-    path('finished_products/add/', FinishedProductView.as_view({'post': 'create'}), name='finished-products-add'),
-    path('finished_products/detail/<int:pk>/', FinishedProductView.as_view({'get': 'retrieve'}), name='finished-products-detail'),
-    path('finished_products/edit/<int:pk>/', FinishedProductView.as_view({'put': 'update'}), name='finished-products-edit'),
-    path('finished_products/delete/<int:pk>/', FinishedProductView.as_view({'delete': 'destroy'}), name='finished-products-delete'),
+    # Finished Products URLs
+    path('finished-products/', ListFinishedProductsView.as_view(), name='list_finished_products'),
+    path('finished-products/<int:pk>/', RetrieveFinishedProductView.as_view(), name='retrieve_finished_product'),
+    path('finished-products/create/', CreateFinishedProductView.as_view(), name='create_finished_product'),
+    path('finished-products/update/<int:pk>/', UpdateFinishedProductView.as_view(), name='update_finished_product'),
+    path('finished-products/delete/<int:pk>/', DeleteFinishedProductView.as_view(), name='delete_finished_product'),
 ]

@@ -33,9 +33,7 @@ class FinishedProducts(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="finished_products")
     description = models.TextField(max_length=255)
     expired_date = models.DateField(_("Expiry Date"))
-    main_image = models.CharField(max_length=255)
-    sub_image_1 = models.CharField(max_length=255, blank=True, null=True)
-    sub_image_2 = models.CharField(max_length=255, blank=True, null=True)
+    image = ArrayField(models.URLField(max_length=200), blank=True, null=True)
     is_available = models.BooleanField(_("Is Available"), default=True)
     is_deleted = models.BooleanField(default=False)
 
