@@ -55,8 +55,10 @@ INSTALLED_APPS = [
     'warehouse',
     'payment',
 ]
+
 DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
 DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
+
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
