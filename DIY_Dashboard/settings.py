@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
 
 
 
@@ -207,7 +207,7 @@ DATABASES = {
         'NAME': 'diy_erp_company',
         'USER': 'postgres',
         'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'HOST': '54.224.77.45',
         'PORT': '5432',
     }
 }

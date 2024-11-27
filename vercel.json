@@ -2,13 +2,13 @@
     "version": 2,
     "builds": [
       {
-        "src": "manage.py",
+        "src": "DIY_Dashboard/wsgi.py",
         "use": "@vercel/python",
-        "config": { "maxLambdaSize": "15mb", "runtime":"Python3.9" }
+        "config": { "maxLambdaSize": "15mb", "runtime":"python3.9" }
       }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "manage.py" }
+      { "src": "/(.*)", "dest": "DIY_Dashboard/wsgi.py" }
     ]
   }
   
