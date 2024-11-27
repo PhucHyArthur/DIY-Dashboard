@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 from datetime import timedelta
 
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'sales',
     'common',
     'warehouse',
+    'payment',
 ]
 DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
 DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
@@ -130,6 +131,13 @@ OAUTH2_PROVIDER = {
         'warehouse_update': 'Update warehouse items',
         'warehouse_delete': 'Delete warehouse items',
     }
+}
+
+VNPAY = {
+    'vnp_TmnCode': config('VNP_TMNCODE'),
+    'vnp_HashSecret': config('VNP_HASHSECRET'),
+    'vnp_Url': config('VNP_URL'),
+    'vnp_ReturnUrl': config('VNP_RETURNURL'),
 }
 
 AUTH_USER_MODEL = 'users.Employee'
