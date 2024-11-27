@@ -1,8 +1,7 @@
 from django.urls import path
 from .views import (
-    CartListView, CartCreateView, CartDetailView, CartUpdateView, CartDeleteView,
+    CartCreateView,
     CartLineListView, CartLineCreateView, CartLineDetailView, CartLineUpdateView, CartLineDeleteView,
-    FavoritesListView, FavoritesCreateView, FavoritesDetailView, FavoritesUpdateView, FavoritesDeleteView,
     FavoriteLineListView, FavoriteLineCreateView, FavoriteLineDetailView, FavoriteLineUpdateView, FavoriteLineDeleteView,
 )
 

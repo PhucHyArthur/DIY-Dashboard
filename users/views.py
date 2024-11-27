@@ -20,6 +20,8 @@ from .serializers import RoleSerializer, UserRegisterSerializer
 
 User = get_user_model()
 
+def welcome_view(request):
+    return JsonResponse({"message": "Welcome to ERP"})
 
 # API cho Role
 class RegisterRoleView(APIView):
