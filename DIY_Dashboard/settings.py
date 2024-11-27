@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'oauth2_provider',
+    'drf_yasg',
 
     # Custom apps
     'users',
