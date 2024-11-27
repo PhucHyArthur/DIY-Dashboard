@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     'warehouse',
     'payment',
 ]
-DEFAULT_CLIENT_ID = "QvcQRFooaJz58MQsKI4iaiNofD0jgJsnzvznaL7r"
-DEFAULT_CLIENT_SECRET = "p7JpoOUGt1HY7XpXwcC8QvXjEUBfhZV2sTSNoAasY76QbASBtHsSRbpQA0ZM0LGJMblHOz4yC37zhfrhghdrIkQS8T9zap8RUD4JErZPax0bIoOryjYuWyPolhB8HnIM"
+DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
+DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -248,6 +248,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static", 
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 STATICFILES_DIRS = [
     BASE_DIR / "static", 
