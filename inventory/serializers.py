@@ -46,7 +46,7 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinishedProducts
-        fields = ['id', 'name', 'category', 'selling_price', 'quantity_in_stock', 'location', 'description', 'expired_date', 'image', 'is_available', 'is_deleted']
+        fields = ['id', 'name', 'category', 'selling_price',"unit", 'quantity_in_stock', 'location', 'description', 'expired_date', 'image', 'is_available', 'is_deleted']
 
     def create(self, validated_data):
         # Xử lý tạo Location trước khi tạo FinishedProducts

@@ -23,9 +23,11 @@ urlpatterns = [
     path("api/inventory/", include("inventory.urls")),
     path("api/suppliers/", include("suppliers.urls")),
     path("api/warehouses/", include("warehouse.urls")),
+    path("api/sales/", include("sales.urls")),
     path("api/orders/", include("orders.urls")),
     path("api/auth/", include("users.urls")),
     path("api/", include(oauth2_urls)),
+
     # Swagger URLs
     re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
