@@ -55,8 +55,10 @@ INSTALLED_APPS = [
     'warehouse',
     'payment',
 ]
+
 DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
 DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
+
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -213,6 +215,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -247,11 +250,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
-STATICFILES_DIRS = []
-
-STATIC_ROOT = BASE_DIR / 'staticfiles/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # Default primary key field type
