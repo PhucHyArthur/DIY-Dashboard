@@ -173,6 +173,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 # AUTHENTICATION_BACKENDS = [
@@ -256,6 +257,8 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Default primary key field type
