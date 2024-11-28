@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', "54.224.77.45"]
 
 
 
@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     'warehouse',
     'payment',
 ]
-DEFAULT_CLIENT_ID = "QvcQRFooaJz58MQsKI4iaiNofD0jgJsnzvznaL7r"
-DEFAULT_CLIENT_SECRET = "p7JpoOUGt1HY7XpXwcC8QvXjEUBfhZV2sTSNoAasY76QbASBtHsSRbpQA0ZM0LGJMblHOz4yC37zhfrhghdrIkQS8T9zap8RUD4JErZPax0bIoOryjYuWyPolhB8HnIM"
+DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
+DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
     'SCOPES': {
@@ -207,10 +207,11 @@ DATABASES = {
         'NAME': 'diy_erp_company',
         'USER': 'postgres',
         'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'HOST': '54.224.77.45',
         'PORT': '5432',
     }
 }
+
 
 
 # Password validation
