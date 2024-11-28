@@ -3,5 +3,5 @@
 env/
 venv_name/
 venv/
-env
+.env
 serviceAccountKey.json
