@@ -1,246 +1,92 @@
-from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope
-
+from rest_framework import status, serializers
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication
+from users.validators import TokenHasAnyScope
 from .models import Warehouse, Zone, Aisle, Rack
 from .serializers import WarehouseSerializer, ZoneSerializer, AisleSerializer, RackSerializer
 
-
-# Warehouse APIs
-class RegisterWarehouseView(APIView):
+class ScopedModelViewSet(ModelViewSet):
+    """
+    Base ViewSet để ánh xạ required_scopes theo từng hành động.
+    """
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_create']
+    permission_classes = [TokenHasAnyScope]
 
-    def post(self, request, *args, **kwargs):
-        serializer = WarehouseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WarehouseListView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_read']
-
-    def get(self, request, *args, **kwargs):
-        warehouses = Warehouse.objects.all()
-        data = WarehouseSerializer(warehouses, many=True).data
-        return Response(data, status=status.HTTP_200_OK)
+    def get_permissions(self):
+        """
+        Ánh xạ required_scopes theo từng hành động.
+        """
+        action_scopes = {
+            'list': ['warehouse_read'],
+            'retrieve': ['warehouse_read'],
+            'create': ['warehouse_create'],
+            'update': ['warehouseupdate'],
+            'partial_update': ['warehouse_update'],
+            'destroy': ['warehouse_delete']
+        }
+        self.required_scopes = action_scopes.get(self.action, [])
+        return super().get_permissions()
 
 
-class UpdateWarehouseView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_update']
-
-    def put(self, request, pk, *args, **kwargs):
-        warehouse = Warehouse.objects.filter(pk=pk).first()
-        if not warehouse:
-            return Response({"error": "Warehouse not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = WarehouseSerializer(warehouse, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": f"Warehouse {warehouse.name} updated successfully."},
-                            status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# Warehouse ViewSet
+class WarehouseViewSet(ScopedModelViewSet):
+    """
+    ViewSet để quản lý Warehouse (CRUD).
+    """
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
 
 
-class DeleteWarehouseView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_delete']
+# Zone ViewSet
+class ZoneViewSet(ScopedModelViewSet):
+    """
+    ViewSet để quản lý Zone (CRUD).
+    """
+    queryset = Zone.objects.all()
+    serializer_class = ZoneSerializer
 
-    def delete(self, request, pk, *args, **kwargs):
-        warehouse = Warehouse.objects.filter(pk=pk).first()
-        if not warehouse:
-            return Response({"error": "Warehouse not found."}, status=status.HTTP_404_NOT_FOUND)
-        warehouse.delete()
-        return Response({"message": "Warehouse deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-# Zone APIs
-class RegisterZoneView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_create']
-
-    def post(self, request, *args, **kwargs):
-        serializer = ZoneSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        """
+        Kiểm tra số lượng zones trước khi tạo.
+        """
+        warehouse = serializer.validated_data.get('warehouse')
+        if warehouse.zones.count() >= warehouse.capacity:
+            raise serializers.ValidationError("The number of zones has exceeded the warehouse capacity.")
+        serializer.save()
 
 
-class ZoneListView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_read']
+# Aisle ViewSet
+class AisleViewSet(ScopedModelViewSet):
+    """
+    ViewSet để quản lý Aisle (CRUD).
+    """
+    queryset = Aisle.objects.all()
+    serializer_class = AisleSerializer
 
-    def get(self, request, *args, **kwargs):
-        zones = Zone.objects.all()
-        data = ZoneSerializer(zones, many=True).data
-        return Response(data, status=status.HTTP_200_OK)
-
-
-class UpdateZoneView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_update']
-
-    def put(self, request, pk, *args, **kwargs):
-        zone = Zone.objects.filter(pk=pk).first()
-        if not zone:
-            return Response({"error": "Zone not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = ZoneSerializer(zone, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": f"Zone {zone.name} updated successfully."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        """
+        Kiểm tra số lượng aisles trước khi tạo.
+        """
+        zone = serializer.validated_data.get('zone')
+        if zone.aisles.count() >= zone.number_of_aisles:
+            raise serializers.ValidationError("The number of aisles has exceeded the zone capacity.")
+        serializer.save()
 
 
-class DeleteZoneView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_delete']
+# Rack ViewSet
+class RackViewSet(ScopedModelViewSet):
+    """
+    ViewSet để quản lý Rack (CRUD).
+    """
+    queryset = Rack.objects.all()
+    serializer_class = RackSerializer
 
-    def delete(self, request, pk, *args, **kwargs):
-        zone = Zone.objects.filter(pk=pk).first()
-        if not zone:
-            return Response({"error": "Zone not found."}, status=status.HTTP_404_NOT_FOUND)
-        zone.delete()
-        return Response({"message": "Zone deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-# Aisle APIs
-class RegisterAisleView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_create']
-
-    def post(self, request, *args, **kwargs):
-        zone_id = request.data.get("zone")
-        zone = Zone.objects.filter(pk=zone_id).first()
-        if not zone:
-            return Response({"error": "Zone not found."}, status=status.HTTP_404_NOT_FOUND)
-        if zone.is_aisles_exceeded():
-            return Response({"error": "Aisles exceeded for this zone."}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = AisleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AisleListView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_read']
-
-    def get(self, request, *args, **kwargs):
-        aisles = Aisle.objects.all()
-        data = AisleSerializer(aisles, many=True).data
-        return Response(data, status=status.HTTP_200_OK)
-
-
-class UpdateAisleView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_update']
-
-    def put(self, request, pk, *args, **kwargs):
-        aisle = Aisle.objects.filter(pk=pk).first()
-        if not aisle:
-            return Response({"error": "Aisle not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = AisleSerializer(aisle, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": f"Aisle {aisle.name} updated successfully."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class DeleteAisleView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_delete']
-
-    def delete(self, request, pk, *args, **kwargs):
-        aisle = Aisle.objects.filter(pk=pk).first()
-        if not aisle:
-            return Response({"error": "Aisle not found."}, status=status.HTTP_404_NOT_FOUND)
-        aisle.delete()
-        return Response({"message": "Aisle deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-# Rack APIs
-class RegisterRackView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_create']
-
-    def post(self, request, *args, **kwargs):
-        aisle_id = request.data.get("aisle")
-        aisle = Aisle.objects.filter(pk=aisle_id).first()
-        if not aisle:
-            return Response({"error": "Aisle not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        if aisle.is_racks_exceeded():
-            return Response({"error": "Racks exceeded for this aisle."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        zone = aisle.zone
-        if zone.is_capacity_exceeded():
-            return Response({"error": "Rack capacity exceeded for this zone."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = RackSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class RackListView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_read']
-
-    def get(self, request, *args, **kwargs):
-        racks = Rack.objects.all()
-        data = RackSerializer(racks, many=True).data
-        return Response(data, status=status.HTTP_200_OK)
-
-
-class UpdateRackView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_update']
-
-    def put(self, request, pk, *args, **kwargs):
-        rack = Rack.objects.filter(pk=pk).first()
-        if not rack:
-            return Response({"error": "Rack not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = RackSerializer(rack, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": f"Rack {rack.name} updated successfully."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class DeleteRackView(APIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    required_scopes = ['warehouse_delete']
-
-    def delete(self, request, pk, *args, **kwargs):
-        rack = Rack.objects.filter(pk=pk).first()
-        if not rack:
-            return Response({"error": "Rack not found."}, status=status.HTTP_404_NOT_FOUND)
-        rack.delete()
-        return Response({"message": "Rack deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    def perform_create(self, serializer):
+        """
+        Kiểm tra capacity trước khi tạo.
+        """
+        aisle = serializer.validated_data.get('aisle')
+        if aisle.racks.count() >= aisle.number_of_racks:
+            raise serializers.ValidationError("The number of racks has exceeded the aisle capacity.")
+        serializer.save()
