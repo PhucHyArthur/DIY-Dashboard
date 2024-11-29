@@ -14,15 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
-from firebase_admin import credentials
-import firebase_admin
 
 load_dotenv()
 
-cred = credentials.Certificate("./serviceAccountKey.json")
-firebase_admin.initialize_app(cred, {
-    'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET') 
-})
+# cred = credentials.Certificate("./serviceAccountKey.json")
+# firebase_admin.initialize_app(cred, {
+#     'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET') 
+# })
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,11 +33,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
 
-ALLOWED_HOSTS = ['localhost']
+# ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -68,8 +66,17 @@ INSTALLED_APPS = [
     'payment',
 ]
 
-DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
-DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
+# DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
+# DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
+
+DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
+DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
+
+# FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
+# FIREBASE_AUTH_DOMAIN = os.getenv('FIREBASE_AUTH_DOMAIN')
+# FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
+# FIREBASE_STORAGE_BUCKET = os.getenv('FIREBASE_STORAGE_BUCKET')
+# FIREBASE_APP_ID = os.getenv('FIREBASE_APP_ID')
 
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
@@ -216,18 +223,28 @@ WSGI_APPLICATION = "DIY_Dashboard.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'diy_erp_company',
+#         'USER': 'myuser',
+#         'PASSWORD': '123456',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diy_erp_company',
-        'USER': 'myuser',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('POSTGRES_DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': '5432',
     }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
