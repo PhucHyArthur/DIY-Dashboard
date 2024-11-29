@@ -33,11 +33,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
 
-ALLOWED_HOSTS = ['localhost']
+# ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -132,17 +132,17 @@ OAUTH2_PROVIDER = {
         #enduser
         'enduser' : 'all permission in enduser',
 
-        # #cart
-        # 'cart_create': 'Create cart',
-        # 'cart_read': 'Read cart',
-        # 'cart_update': 'Update cart',
-        # 'cart_delete': 'Delete cart',
+        #cart
+        'cart_create': 'Create cart',
+        'cart_read': 'Read cart',
+        'cart_update': 'Update cart',
+        'cart_delete': 'Delete cart',
 
-        # #favorites
-        # 'favorites_create': 'Create favorites',
-        # 'favorites_read': 'Read favorites',
-        # 'favorites_update': 'Update favorites',
-        # 'favorites_delete': 'Delete favorites',
+        #favorites
+        'favorites_create': 'Create favorites',
+        'favorites_read': 'Read favorites',
+        'favorites_update': 'Update favorites',
+        'favorites_delete': 'Delete favorites',
 
         #common
         'common_read': 'Read common resources',
@@ -223,28 +223,28 @@ WSGI_APPLICATION = "DIY_Dashboard.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diy_erp_company',
-        'USER': 'myuser',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB_NAME'),
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('POSTGRES_HOST'),
+#         'NAME': 'diy_erp_company',
+#         'USER': 'myuser',
+#         'PASSWORD': '123456',
+#         'HOST': 'localhost',
 #         'PORT': '5432',
 #     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': '5432',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

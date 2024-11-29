@@ -1,37 +1,52 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
-    SalesOrderListView, SalesOrderCreateView, SalesOrderDetailView, SalesOrderUpdateView, SalesOrderDeleteView,
-    SalesOrderLineListView, SalesOrderLineCreateView, SalesOrderLineDetailView, SalesOrderLineUpdateView, SalesOrderLineDeleteView,
-    PurchaseOrderListView, PurchaseOrderCreateView, PurchaseOrderDetailView, PurchaseOrderUpdateView, PurchaseOrderDeleteView,
-    PurchaseOrderLineListView, PurchaseOrderLineCreateView, PurchaseOrderLineDetailView, PurchaseOrderLineUpdateView, PurchaseOrderLineDeleteView,
+    SalesOrderViewSet, SalesOrderLineViewSet,
+    PurchaseOrderViewSet, PurchaseOrderLineViewSet
 )
 
+# Sales Order URLs
+sales_order_urls = [
+    path('list/', SalesOrderViewSet.as_view({'get': 'list'}), name='sales-order-list'),
+    path('create/', SalesOrderViewSet.as_view({'post': 'create'}), name='sales-order-create'),
+    path('detail/<int:pk>/', SalesOrderViewSet.as_view({'get': 'retrieve'}), name='sales-order-detail'),
+    path('edit/<int:pk>/', SalesOrderViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='sales-order-edit'),
+    path('delete/<int:pk>/', SalesOrderViewSet.as_view({'delete': 'destroy'}), name='sales-order-delete'),
+]
+
+# Sales Order Line URLs
+sales_order_line_urls = [
+    path('list/', SalesOrderLineViewSet.as_view({'get': 'list'}), name='sales-order-line-list'),
+    path('create/', SalesOrderLineViewSet.as_view({'post': 'create'}), name='sales-order-line-create'),
+    path('detail/<int:pk>/', SalesOrderLineViewSet.as_view({'get': 'retrieve'}), name='sales-order-line-detail'),
+    path('edit/<int:pk>/', SalesOrderLineViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='sales-order-line-edit'),
+    path('delete/<int:pk>/', SalesOrderLineViewSet.as_view({'delete': 'destroy'}), name='sales-order-line-delete'),
+]
+
+# Purchase Order URLs
+purchase_order_urls = [
+    path('list/', PurchaseOrderViewSet.as_view({'get': 'list'}), name='purchase-order-list'),
+    path('create/', PurchaseOrderViewSet.as_view({'post': 'create'}), name='purchase-order-create'),
+    path('detail/<int:pk>/', PurchaseOrderViewSet.as_view({'get': 'retrieve'}), name='purchase-order-detail'),
+    path('edit/<int:pk>/', PurchaseOrderViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='purchase-order-edit'),
+    path('delete/<int:pk>/', PurchaseOrderViewSet.as_view({'delete': 'destroy'}), name='purchase-order-delete'),
+]
+
+# Purchase Order Line URLs
+purchase_order_line_urls = [
+    path('list/', PurchaseOrderLineViewSet.as_view({'get': 'list'}), name='purchase-order-line-list'),
+    path('create/', PurchaseOrderLineViewSet.as_view({'post': 'create'}), name='purchase-order-line-create'),
+    path('detail/<int:pk>/', PurchaseOrderLineViewSet.as_view({'get': 'retrieve'}), name='purchase-order-line-detail'),
+    path('edit/<int:pk>/', PurchaseOrderLineViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='purchase-order-line-edit'),
+    path('delete/<int:pk>/', PurchaseOrderLineViewSet.as_view({'delete': 'destroy'}), name='purchase-order-line-delete'),
+]
+
+# Main urlpatterns
 urlpatterns = [
-    # Sales Order
-    path('sales-orders/', SalesOrderListView.as_view(), name='sales-order-list'),
-    path('sales-orders/create/', SalesOrderCreateView.as_view(), name='sales-order-create'),
-    path('sales-orders/<int:pk>/', SalesOrderDetailView.as_view(), name='sales-order-detail'),
-    path('sales-orders/update/<int:pk>/', SalesOrderUpdateView.as_view(), name='sales-order-update'),
-    path('sales-orders/delete/<int:pk>/', SalesOrderDeleteView.as_view(), name='sales-order-delete'),
+    # Sales Orders
+    path('sales-orders/', include((sales_order_urls, 'sales-orders'))),
+    path('sales-order-lines/', include((sales_order_line_urls, 'sales-order-lines'))),
 
-    # Sales Order Line
-    path('sales-order-lines/', SalesOrderLineListView.as_view(), name='sales-order-line-list'),
-    path('sales-order-lines/create/', SalesOrderLineCreateView.as_view(), name='sales-order-line-create'),
-    path('sales-order-lines/<int:pk>/', SalesOrderLineDetailView.as_view(), name='sales-order-line-detail'),
-    path('sales-order-lines/update/<int:pk>/', SalesOrderLineUpdateView.as_view(), name='sales-order-line-update'),
-    path('sales-order-lines/delete/<int:pk>/', SalesOrderLineDeleteView.as_view(), name='sales-order-line-delete'),
-
-    # Purchase Order
-    path('purchase-orders/', PurchaseOrderListView.as_view(), name='purchase-order-list'),
-    path('purchase-orders/create/', PurchaseOrderCreateView.as_view(), name='purchase-order-create'),
-    path('purchase-orders/<int:pk>/', PurchaseOrderDetailView.as_view(), name='purchase-order-detail'),
-    path('purchase-orders/update/<int:pk>/', PurchaseOrderUpdateView.as_view(), name='purchase-order-update'),
-    path('purchase-orders/delete/<int:pk>/', PurchaseOrderDeleteView.as_view(), name='purchase-order-delete'),
-
-    # Purchase Order Line
-    path('purchase-order-lines/', PurchaseOrderLineListView.as_view(), name='purchase-order-line-list'),
-    path('purchase-order-lines/create/', PurchaseOrderLineCreateView.as_view(), name='purchase-order-line-create'),
-    path('purchase-order-lines/<int:pk>/', PurchaseOrderLineDetailView.as_view(), name='purchase-order-line-detail'),
-    path('purchase-order-lines/update/<int:pk>/', PurchaseOrderLineUpdateView.as_view(), name='purchase-order-line-update'),
-    path('purchase-order-lines/delete/<int:pk>/', PurchaseOrderLineDeleteView.as_view(), name='purchase-order-line-delete'),
+    # Purchase Orders
+    path('purchase-orders/', include((purchase_order_urls, 'purchase-orders'))),
+    path('purchase-order-lines/', include((purchase_order_line_urls, 'purchase-order-lines'))),
 ]
