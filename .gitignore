@@ -3,3 +3,4 @@
 env/
 venv_name/
 venv/
+.env

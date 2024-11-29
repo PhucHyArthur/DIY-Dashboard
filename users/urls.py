@@ -1,14 +1,47 @@
 from django.urls import path, include
-from .views import RegisterEmployeeView, RegisterRoleView, CustomTokenView, EmployeeListView, UpdateEmployeeView, DeleteEmployeeView, RoleListView, UpdateRoleView, DeleteRoleView
+from .views import ClientRegisterView, ClientViewSet, CustomTokenView, RoleViewSet, EmployeeViewSet
 
+# Role URLs
+role_urls = [
+    path('list/', RoleViewSet.as_view({'get': 'list'}), name='role-list'),
+    path('create/', RoleViewSet.as_view({'post': 'create'}), name='role-create'),
+    path('detail/<int:pk>/', RoleViewSet.as_view({'get': 'retrieve'}), name='role-detail'),
+    path('edit/<int:pk>/', RoleViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='role-edit'),
+    path('delete/<int:pk>/', RoleViewSet.as_view({'delete': 'destroy'}), name='role-delete'),
+]
+
+# Employee URLs
+employee_urls = [
+    path('list/', EmployeeViewSet.as_view({'get': 'list'}), name='employee-list'),
+    path('create/', EmployeeViewSet.as_view({'post': 'create'}), name='employee-create'),
+    path('detail/<int:pk>/', EmployeeViewSet.as_view({'get': 'retrieve'}), name='employee-detail'),
+    path('edit/<int:pk>/', EmployeeViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='employee-edit'),
+    path('delete/<int:pk>/', EmployeeViewSet.as_view({'delete': 'destroy'}), name='employee-delete'),
+]
+
+# Client URLs
+client_urls = [
+    path('list/', ClientViewSet.as_view({'get': 'list'}), name='client-list'),
+    path('create/', ClientViewSet.as_view({'post': 'create'}), name='client-create'),
+    path('detail/<int:pk>/', ClientViewSet.as_view({'get': 'retrieve'}), name='client-detail'),
+    path('edit/<int:pk>/', ClientViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='client-edit'),
+    path('delete/<int:pk>/', ClientViewSet.as_view({'delete': 'destroy'}), name='client-delete'),
+]
+
+# Main urlpatterns
 urlpatterns = [
-    path('employees/register/', RegisterEmployeeView.as_view(), name='register-employee'),
-    path('employees/list/', EmployeeListView.as_view(), name='employee-list'),
-    path('employees/<int:pk>/', UpdateEmployeeView.as_view(), name='update-employee'),
-    path('employees/delete/<int:pk>/', DeleteEmployeeView.as_view(), name='delete-employee'),
+    # Login URL
     path("o/token/", CustomTokenView.as_view(), name="custom-token"),
-    path('roles/register/', RegisterRoleView.as_view(), name='register-role'),
-    path('roles/', RoleListView.as_view(), name='role-list'),
-    path('roles/<int:pk>/', UpdateRoleView.as_view(), name='update-role'),
-    path('roles/delete/<int:pk>/', DeleteRoleView.as_view(), name='delete-role'),
+    
+    # Role URLs
+    path('roles/', include((role_urls, 'roles'))),
+
+    # Employee URLs
+    path('employees/', include((employee_urls, 'employees'))),
+
+    # Client URLs
+    path('clients/', include((client_urls, 'clients'))),
+
+    # Client Registration (separate API)
+    path('clients/register/', ClientRegisterView.as_view(), name='client-register'),
 ]

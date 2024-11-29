@@ -1,5 +1,6 @@
 from oauth2_provider.oauth2_validators import OAuth2Validator
 from oauth2_provider.models import AccessToken
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope
 
 class CustomOAuth2Validator(OAuth2Validator):
     def save_bearer_token(self, token, request, *args, **kwargs):
@@ -12,3 +13,20 @@ class CustomOAuth2Validator(OAuth2Validator):
             token['scope'] = " ".join(role_scopes)
 
         super().save_bearer_token(token, request, *args, **kwargs)
+
+class TokenHasAnyScope(TokenHasScope):
+    """
+    Custom permission: Cho phép nếu token chứa ít nhất một scope trong required_scopes.
+    """
+
+    def has_permission(self, request, view):
+        required_scopes = getattr(view, 'required_scopes', [])
+        if not required_scopes:
+            return True  
+
+        token = request.auth
+        if not token or not hasattr(token, 'scope'):
+            return False  
+
+        token_scopes = token.scope.split() 
+        return any(scope in token_scopes for scope in required_scopes)
