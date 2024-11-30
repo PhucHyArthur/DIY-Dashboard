@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'drf_yasg',
+    'corsheaders',
 
     # Custom apps
     'users',
@@ -193,7 +194,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 
 # AUTHENTICATION_BACKENDS = [
 #     'oauth2_provider.backends.OAuth2Backend'
