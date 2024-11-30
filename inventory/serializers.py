@@ -55,9 +55,6 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         # Xử lý tạo Location trước khi tạo FinishedProducts
         location_data = validated_data.pop('location')
         location = Location.objects.create(**location_data)
-        
-        images = validated_data.pop('image', [])    
-        validated_data['image'] = self._process_images(images)
 
         # Tạo FinishedProducts
         finished_product = FinishedProducts.objects.create(location=location, **validated_data)
