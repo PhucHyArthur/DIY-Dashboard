@@ -1,114 +1,64 @@
 from rest_framework import serializers
-from .models import RawMaterials, FinishedProducts, Image
+from .models import RawMaterials, RawMaterialsLine, FinishedProducts, Image
 from warehouse.models import Location
 
-# Serializer cho Image
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ['id', 'url']
 
-# Serializer cho Location
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ['id', 'rack', 'bin_number', 'description', 'quantity', 'is_deleted', 'is_fulled']
 
-# Serializer cho RawMaterials
+
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ['id', 'url']
+
+
+class RawMaterialsLineSerializer(serializers.ModelSerializer):
+    location = LocationSerializer
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    class Meta:
+        model = RawMaterialsLine
+        fields = [
+            'id', 'quantity', 'supplier', 'supplier_name', 
+            'price_per_unit', 'line_total', 'location', 
+            'created_at', 'is_deleted', 'is_available'
+        ]
+        read_only_fields = ['line_total', 'created_at']
+
+    def create(self, validated_data):
+        """
+        Custom create method để xử lý nested location.
+        """
+        location_data = validated_data.pop('location')  
+        location, created = Location.objects.get_or_create(**location_data)
+        validated_data['location'] = location  
+        return super().create(validated_data)
+
 class RawMaterialsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
-    images = ImageSerializer(many=True, required=False)  # Nested Serializer cho ảnh
+    raw_materials_lines = RawMaterialsLineSerializer(many=True, read_only=True)  # Nested RawMaterialsLine
+    images = ImageSerializer(many=True, read_only=True, source='images')  # Nested images
 
     class Meta:
         model = RawMaterials
         fields = [
-            'id', 'name', 'category', 'images', 'price_per_unit', 'unit',
-            'quantity_in_stock', 'location', 'description', 'expired_date',
-            'is_available', 'is_deleted'
+            'id', 'name', 'category', 'description', 'total_quantity', 
+            'total_amount', 'created_at', 'updated_at', 'is_available', 
+            'is_deleted', 'raw_materials_lines', 'images'
         ]
+        read_only_fields = ['total_quantity', 'total_amount', 'created_at', 'updated_at']
 
-    def create(self, validated_data):
-        # Xử lý tạo Location trước khi tạo RawMaterials
-        location_data = validated_data.pop('location')
-        location = Location.objects.create(**location_data)
 
-        # Lấy dữ liệu ảnh
-        images_data = validated_data.pop('images', [])
-        
-        # Tạo RawMaterials
-        raw_material = RawMaterials.objects.create(location=location, **validated_data)
-
-        # Tạo các đối tượng Image liên quan
-        for image_data in images_data:
-            Image.objects.create(raw_material=raw_material, **image_data)
-
-        return raw_material
-
-    def update(self, instance, validated_data):
-        # Cập nhật Location nếu có thay đổi
-        location_data = validated_data.pop('location', None)
-        if location_data:
-            for attr, value in location_data.items():
-                setattr(instance.location, attr, value)
-            instance.location.save()
-
-        # Xóa và cập nhật lại ảnh liên quan
-        images_data = validated_data.pop('images', [])
-        instance.images.all().delete()  # Xóa ảnh cũ
-        for image_data in images_data:
-            Image.objects.create(raw_material=instance, **image_data)
-
-        # Cập nhật các trường của RawMaterials
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
-
-# Serializer cho FinishedProducts
 class FinishedProductsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
-    images = ImageSerializer(many=True, required=False)  # Nested Serializer cho ảnh
+    location = LocationSerializer(read_only=True)  # Nested LocationSerializer
+    images = ImageSerializer(many=True, read_only=True, source='images')  # Nested images
 
     class Meta:
         model = FinishedProducts
         fields = [
-            'id', 'name', 'category', 'selling_price', 'unit', 'quantity_in_stock',
-            'location', 'description', 'expired_date', 'images', 'is_available', 'is_deleted'
+            'id', 'name', 'category', 'selling_price', 'total_quantiy', 
+            'unit', 'location', 'description', 'expired_date', 
+            'is_available', 'is_deleted', 'created_at', 'updated_at', 'images'
         ]
-
-    def create(self, validated_data):
-        # Xử lý tạo Location trước khi tạo FinishedProducts
-        location_data = validated_data.pop('location')
-        location = Location.objects.create(**location_data)
-
-        # Lấy dữ liệu ảnh
-        images_data = validated_data.pop('images', [])
-        
-        # Tạo FinishedProducts
-        finished_product = FinishedProducts.objects.create(location=location, **validated_data)
-
-        # Tạo các đối tượng Image liên quan
-        for image_data in images_data:
-            Image.objects.create(finished_product=finished_product, **image_data)
-
-        return finished_product
-
-    def update(self, instance, validated_data):
-        # Cập nhật Location nếu có thay đổi
-        location_data = validated_data.pop('location', None)
-        if location_data:
-            for attr, value in location_data.items():
-                setattr(instance.location, attr, value)
-            instance.location.save()
-
-        # Xóa và cập nhật lại ảnh liên quan
-        images_data = validated_data.pop('images', [])
-        instance.images.all().delete()  # Xóa ảnh cũ
-        for image_data in images_data:
-            Image.objects.create(finished_product=instance, **image_data)
-
-        # Cập nhật các trường của FinishedProducts
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
+        read_only_fields = ['created_at', 'updated_at']

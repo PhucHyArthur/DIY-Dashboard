@@ -1,6 +1,11 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import RawMaterials, FinishedProducts
-from .serializers import RawMaterialsSerializer, FinishedProductsSerializer
+from .models import RawMaterials, RawMaterialsLine, FinishedProducts
+from warehouse.models import Location
+from .serializers import (
+    RawMaterialsSerializer,
+    RawMaterialsLineSerializer,
+    FinishedProductsSerializer,
+)
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from users.validators import TokenHasAnyScope
 
@@ -36,7 +41,7 @@ class RawMaterialsViewSet(ScopedModelViewSet):
 
     def get_action_scopes(self):
         """
-        Scope chỉ cho phép người dùng có quyền raw_materials_read.
+        Scope cho phép người dùng thực hiện các hành động liên quan đến raw materials.
         """
         return {
             'list': ['raw_materials_read'],
@@ -49,7 +54,34 @@ class RawMaterialsViewSet(ScopedModelViewSet):
 
     def get_queryset(self):
         """
-        Tùy chỉnh queryset để chỉ trả về các nguyên vật liệu chưa bị xóa.
+        Tùy chỉnh queryset để chỉ trả về các raw materials chưa bị xóa.
+        """
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class RawMaterialsLineViewSet(ScopedModelViewSet):
+    """
+    ViewSet for managing Raw Materials Lines.
+    """
+    queryset = RawMaterialsLine.objects.all()
+    serializer_class = RawMaterialsLineSerializer
+
+    def get_action_scopes(self):
+        """
+        Scope cho phép người dùng thực hiện các hành động liên quan đến raw materials lines.
+        """
+        return {
+            'list': ['raw_materials_read'],
+            'retrieve': ['raw_materials_read'],
+            'create': ['raw_materials_create'],
+            'update': ['raw_materials_update'],
+            'partial_update': ['raw_materials_update'],
+            'destroy': ['raw_materials_delete'],
+        }
+
+    def get_queryset(self):
+        """
+        Tùy chỉnh queryset để chỉ trả về các raw materials lines chưa bị xóa.
         """
         return super().get_queryset().filter(is_deleted=False)
 
@@ -63,7 +95,7 @@ class FinishedProductsViewSet(ScopedModelViewSet):
 
     def get_action_scopes(self):
         """
-        Scope cho phép cả enduser và finished_products_read.
+        Scope cho phép người dùng thực hiện các hành động liên quan đến finished products.
         """
         return {
             'list': ['finished_products_read', 'enduser'], 
@@ -79,3 +111,4 @@ class FinishedProductsViewSet(ScopedModelViewSet):
         Tùy chỉnh queryset để chỉ trả về các sản phẩm hoàn thiện chưa bị xóa.
         """
         return super().get_queryset().filter(is_deleted=False)
+
