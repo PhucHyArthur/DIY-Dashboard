@@ -37,8 +37,8 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class RawMaterialsSerializer(serializers.ModelSerializer):
-    raw_materials_lines = RawMaterialsLineSerializer(many=True, read_only=True)  # Nested RawMaterialsLine
-    images = ImageSerializer(many=True, read_only=True, source='images')  # Nested images
+    raw_materials_lines = RawMaterialsLineSerializer(many=True, read_only=True)
+    images = ImageSerializer(many=True)  # Cho phép chỉnh sửa
 
     class Meta:
         model = RawMaterials
@@ -49,16 +49,19 @@ class RawMaterialsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['total_quantity', 'total_amount', 'created_at', 'updated_at']
 
+    def create(self, validated_data):
+        images_data = validated_data.pop('images', [])  # Lấy dữ liệu ảnh từ request
+        raw_material = RawMaterials.objects.create(**validated_data)
+        # Tạo các đối tượng Image liên kết với RawMaterials
+        for image_data in images_data:
+            Image.objects.create(raw_material=raw_material, **image_data)
+        return raw_material
 
-class FinishedProductsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(read_only=True)  # Nested LocationSerializer
-    images = ImageSerializer(many=True, read_only=True, source='images')  # Nested images
-
-    class Meta:
-        model = FinishedProducts
-        fields = [
-            'id', 'name', 'category', 'selling_price', 'total_quantity', 
-            'unit', 'location', 'description', 'expired_date', 
-            'is_available', 'is_deleted', 'created_at', 'updated_at', 'images'
-        ]
-        read_only_fields = ['created_at', 'updated_at']
+    def update(self, instance, validated_data):
+        images_data = validated_data.pop('images', [])
+        instance = super().update(instance, validated_data)
+        # Xử lý cập nhật hoặc thay đổi ảnh
+        instance.images.all().delete()  # Xóa ảnh cũ (nếu cần)
+        for image_data in images_data:
+            Image.objects.create(raw_material=instance, **image_data)
+        return instance
