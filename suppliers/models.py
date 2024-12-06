@@ -25,7 +25,9 @@ class Representative(models.Model):
 
 class Suppliers(models.Model):
     id = models.AutoField(primary_key=True)
-    representative = models.ForeignKey(Representative, on_delete=models.CASCADE, related_name='suppliers')
+    representative = models.ForeignKey(
+        Representative, on_delete=models.SET_NULL, null=True, blank=True, related_name='suppliers'
+    )
     avatar = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
