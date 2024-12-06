@@ -32,7 +32,7 @@ class Employee(AbstractUser):
 class Client(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="client")
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.TextField(max_length=255, blank=True, null=True)
+    address = models.ArrayField(models.CharField(max_length=255), size=3, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_delete = models.BooleanField(default=False)

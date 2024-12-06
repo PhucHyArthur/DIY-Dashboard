@@ -174,7 +174,7 @@ class ClientRegisterView(APIView):
     
 class ClientViewSet(ModelViewSet):
     """
-    ViewSet cho các hành động cần scope.
+    ViewSet cho các hành động liên quan đến client (enduser).
     """
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasAnyScope]
@@ -186,18 +186,30 @@ class ClientViewSet(ModelViewSet):
         Đặt required_scopes theo từng hành động.
         """
         action_scopes = {
-            'list': ['users_read'],
-            'retrieve': ['users_read'],
-            'update': ['users_update', 'enduser'],
-            'partial_update': ['users_update','enduser'],
-            'destroy': ['users_delete', 'enduser']
+            'list': ['users_read'],  # Nhân viên có thể xem danh sách (nếu cần)
+            'retrieve': ['enduser'],  # Chỉ enduser (client) mới xem được thông tin của chính họ
+            'update': ['enduser'],   # Chỉ enduser có thể cập nhật thông tin cá nhân
+            'partial_update': ['enduser'],
+            'destroy': ['enduser']   # Chỉ enduser mới có thể xóa tài khoản của họ
         }
         self.required_scopes = action_scopes.get(self.action, [])
         return super().get_permissions()
-    
+
+    def get_queryset(self):
+        """
+        Giới hạn queryset để:
+        - Nhân viên có thể xem toàn bộ danh sách (nếu có quyền).
+        - Enduser chỉ xem được chính họ.
+        """
+        if 'enduser' in self.required_scopes:
+            # Nếu là enduser, chỉ trả về thông tin của chính họ
+            return self.queryset.filter(user=self.request.user)
+        # Mặc định, nhân viên có thể truy cập toàn bộ danh sách
+        return self.queryset
+
     def perform_update(self, serializer):
         """
-        Ghi đè để kiểm tra quyền trước khi cập nhật.
+        Đảm bảo chỉ enduser có thể cập nhật thông tin của chính họ.
         """
         instance = self.get_object()
         if self.request.user.id != instance.user.id:
@@ -206,7 +218,7 @@ class ClientViewSet(ModelViewSet):
 
     def perform_destroy(self, instance):
         """
-        Ghi đè để kiểm tra quyền trước khi xóa.
+        Đảm bảo chỉ enduser có thể xóa tài khoản của chính họ.
         """
         if self.request.user.id != instance.user.id:
             raise PermissionDenied("You do not have permission to delete this client.")
