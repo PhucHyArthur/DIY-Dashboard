@@ -1,105 +1,43 @@
-from rest_framework import status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from oauth2_provider.contrib.rest_framework import TokenHasScope
+from rest_framework.viewsets import ModelViewSet
 from .models import Suppliers, Representative
 from .serializers import SuppliersSerializer, RepresentativeSerializer
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope
 
-class SuppliersCreateView(APIView):
+
+class ScopedModelViewSet(ModelViewSet):
     """
-    API to create a supplier.
-    Requires 'suppliers_create' scope.
+    Base ViewSet để ánh xạ `required_scopes` cho từng hành động.
     """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['suppliers_create']
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasScope] 
 
-    def post(self, request, *args, **kwargs):
-        serializer = SuppliersSerializer(data=request.data)
-        if serializer.is_valid():
-            representative_data = request.data.get('representative')
-            if representative_data:
-                rep_serializer = RepresentativeSerializer(data=representative_data)
-                if rep_serializer.is_valid():
-                    representative = rep_serializer.save()
-                    serializer.save(representative=representative)
-                else:
-                    return Response(rep_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({"error": "Representative data is required."}, status=status.HTTP_400_BAD_REQUEST)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_permissions(self):
+        """
+        Gán `required_scopes` dựa trên hành động hiện tại.
+        """
+        action_scopes = {
+            'list': ['suppliers_read'],
+            'retrieve': ['suppliers_read'],
+            'create': ['suppliers_create'],
+            'update': ['suppliers_update'],
+            'partial_update': ['suppliers_update'],
+            'destroy': ['suppliers_delete'],
+        }
+        self.required_scopes = action_scopes.get(self.action, [])
+        return super().get_permissions()
 
 
-class SuppliersListView(APIView):
+class RepresentativeViewSet(ScopedModelViewSet):
     """
-    API to list all suppliers.
-    Requires 'suppliers_read' scope.
+    ViewSet for managing Representatives.
     """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['suppliers_read']
-
-    def get(self, request, *args, **kwargs):
-        suppliers = Suppliers.objects.all()
-        serializer = SuppliersSerializer(suppliers, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    queryset = Representative.objects.all()
+    serializer_class = RepresentativeSerializer
 
 
-class SuppliersDetailView(APIView):
+class SuppliersViewSet(ScopedModelViewSet):
     """
-    API to retrieve a single supplier.
-    Requires 'suppliers_read' scope.
+    ViewSet for managing Suppliers.
     """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['suppliers_read']
-
-    def get(self, request, pk, *args, **kwargs):
-        try:
-            supplier = Suppliers.objects.get(pk=pk)
-            serializer = SuppliersSerializer(supplier)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Suppliers.DoesNotExist:
-            return Response({"error": "Supplier not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
-class SuppliersUpdateView(APIView):
-    """
-    API to update an existing supplier.
-    Requires 'suppliers_update' scope.
-    """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['suppliers_update']
-
-    def put(self, request, pk, *args, **kwargs):
-        try:
-            supplier = Suppliers.objects.get(pk=pk)
-            serializer = SuppliersSerializer(supplier, data=request.data)
-            if serializer.is_valid():
-                representative_data = request.data.get('representative')
-                if representative_data:
-                    rep_serializer = RepresentativeSerializer(supplier.representative, data=representative_data)
-                    if rep_serializer.is_valid():
-                        rep_serializer.save()
-                    else:
-                        return Response(rep_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Suppliers.DoesNotExist:
-            return Response({"error": "Supplier not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
-class SuppliersDeleteView(APIView):
-    """
-    API to delete a supplier.
-    Requires 'suppliers_delete' scope.
-    """
-    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['suppliers_delete']
-
-    def delete(self, request, pk, *args, **kwargs):
-        try:
-            supplier = Suppliers.objects.get(pk=pk)
-            supplier.delete()
-            return Response({"message": "Supplier deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-        except Suppliers.DoesNotExist:
-            return Response({"error": "Supplier not found."}, status=status.HTTP_404_NOT_FOUND)
+    queryset = Suppliers.objects.all()
+    serializer_class = SuppliersSerializer
