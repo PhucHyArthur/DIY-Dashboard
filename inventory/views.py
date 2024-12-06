@@ -1,7 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import RawMaterials, FinishedProducts, Location
-from .serializers import RawMaterialsSerializer, FinishedProductsSerializer, LocationSerializer
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope
+from .models import RawMaterials, FinishedProducts
+from .serializers import RawMaterialsSerializer, FinishedProductsSerializer
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication
+from users.validators import TokenHasAnyScope
 
 
 class ScopedModelViewSet(ModelViewSet):
@@ -9,23 +10,21 @@ class ScopedModelViewSet(ModelViewSet):
     Base ViewSet để ánh xạ `required_scopes` cho từng hành động.
     """
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasScope]
-    scope_prefix = ''  # Prefix động sẽ được gán trong các lớp con
+    permission_classes = [TokenHasAnyScope]
 
     def get_permissions(self):
         """
         Gán `required_scopes` dựa trên hành động hiện tại.
         """
-        action_scopes = {
-            'list': [f'{self.scope_prefix}_read'],
-            'retrieve': [f'{self.scope_prefix}_read'],
-            'create': [f'{self.scope_prefix}_create'],
-            'update': [f'{self.scope_prefix}_update'],
-            'partial_update': [f'{self.scope_prefix}_update'],
-            'destroy': [f'{self.scope_prefix}_delete'],
-        }
+        action_scopes = self.get_action_scopes()
         self.required_scopes = action_scopes.get(self.action, [])
         return super().get_permissions()
+
+    def get_action_scopes(self):
+        """
+        Phương thức để các ViewSet con định nghĩa scope của từng hành động.
+        """
+        raise NotImplementedError("Subclasses must implement `get_action_scopes`.")
 
 
 class RawMaterialsViewSet(ScopedModelViewSet):
@@ -34,7 +33,19 @@ class RawMaterialsViewSet(ScopedModelViewSet):
     """
     queryset = RawMaterials.objects.all()
     serializer_class = RawMaterialsSerializer
-    scope_prefix = 'raw_materials'  # Scope prefix cho Raw Materials
+
+    def get_action_scopes(self):
+        """
+        Scope chỉ cho phép người dùng có quyền raw_materials_read.
+        """
+        return {
+            'list': ['raw_materials_read'],
+            'retrieve': ['raw_materials_read'],
+            'create': ['raw_materials_create'],
+            'update': ['raw_materials_update'],
+            'partial_update': ['raw_materials_update'],
+            'destroy': ['raw_materials_delete'],
+        }
 
     def get_queryset(self):
         """
@@ -49,7 +60,19 @@ class FinishedProductsViewSet(ScopedModelViewSet):
     """
     queryset = FinishedProducts.objects.all()
     serializer_class = FinishedProductsSerializer
-    scope_prefix = 'finished_products'  # Scope prefix cho Finished Products
+
+    def get_action_scopes(self):
+        """
+        Scope cho phép cả enduser và finished_products_read.
+        """
+        return {
+            'list': ['finished_products_read', 'enduser'], 
+            'retrieve': ['finished_products_read', 'enduser'],
+            'create': ['finished_products_create'],
+            'update': ['finished_products_update'],
+            'partial_update': ['finished_products_update'],
+            'destroy': ['finished_products_delete'],
+        }
 
     def get_queryset(self):
         """
