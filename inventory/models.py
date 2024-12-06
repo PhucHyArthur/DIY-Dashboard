@@ -80,7 +80,7 @@ class FinishedProducts(models.Model):
     name = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
-    total_quantiy = models.IntegerField(default=0)
+    total_quantity = models.IntegerField(default=0)
     unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="finished_products", blank=True, null=True)
     description = models.TextField(blank=True, null=True)

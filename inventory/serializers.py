@@ -57,7 +57,7 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinishedProducts
         fields = [
-            'id', 'name', 'category', 'selling_price', 'total_quantiy', 
+            'id', 'name', 'category', 'selling_price', 'total_quantity', 
             'unit', 'location', 'description', 'expired_date', 
             'is_available', 'is_deleted', 'created_at', 'updated_at', 'images'
         ]
