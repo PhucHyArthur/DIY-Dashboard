@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45']
 
@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'drf_yasg',
+    'cloudinary',
+    'cloudinary_storage',
     'corsheaders',
 
     # Custom apps
@@ -73,11 +75,6 @@ INSTALLED_APPS = [
 DEFAULT_CLIENT_ID = "KD4eWL1NsMJR2ovQKjdVCBwy17CE5bqimmUywX5q"
 DEFAULT_CLIENT_SECRET = "dzVHEAouKvZtqoGOIjwiZB7imFqWq48t98HA35upscEkYVYKPNbSlpFHEJKKOuuSgkieoJ0N0IutOUwCHBHhgYCRWNeAyxMxof44vQuVexs8a2pVYKeDOYzU2CZ4GAWT"
 
-# FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
-# FIREBASE_AUTH_DOMAIN = os.getenv('FIREBASE_AUTH_DOMAIN')
-# FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
-# FIREBASE_STORAGE_BUCKET = os.getenv('FIREBASE_STORAGE_BUCKET')
-# FIREBASE_APP_ID = os.getenv('FIREBASE_APP_ID')
 
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'users.validators.CustomOAuth2Validator',
@@ -154,6 +151,14 @@ OAUTH2_PROVIDER = {
         'warehouse_update': 'Update warehouse items',
         'warehouse_delete': 'Delete warehouse items',
     }
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY = {
+    'cloud_name': config('CLOUDINARY_CLOUD_NAME'),
+    'api_key': config('CLOUDINARY_API_KEY'),
+    'api_secret': config('CLOUDINARY_API_SECRET'),
 }
 
 VNPAY = {
