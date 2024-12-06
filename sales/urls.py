@@ -1,19 +1,29 @@
-from django.urls import path
-from .views import (
-    CartLineListView, CartLineCreateView, CartLineUpdateView, CartLineDeleteView,
-    FavoriteLineListView, FavoriteLineCreateView,  FavoriteLineUpdateView, FavoriteLineDeleteView,
-)
+from django.urls import path, include
+from .views import CartLineViewSet, FavoriteLineViewSet
 
+# Cart Line URLs
+cart_line_urls = [
+    path('list/', CartLineViewSet.as_view({'get': 'list'}), name='cart-line-list'),
+    path('create/', CartLineViewSet.as_view({'post': 'create'}), name='cart-line-create'),
+    path('detail/<int:pk>/', CartLineViewSet.as_view({'get': 'retrieve'}), name='cart-line-detail'),
+    path('edit/<int:pk>/', CartLineViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='cart-line-edit'),
+    path('delete/<int:pk>/', CartLineViewSet.as_view({'delete': 'destroy'}), name='cart-line-delete'),
+]
+
+# Favorite Line URLs
+favorite_line_urls = [
+    path('list/', FavoriteLineViewSet.as_view({'get': 'list'}), name='favorite-line-list'),
+    path('create/', FavoriteLineViewSet.as_view({'post': 'create'}), name='favorite-line-create'),
+    path('detail/<int:pk>/', FavoriteLineViewSet.as_view({'get': 'retrieve'}), name='favorite-line-detail'),
+    path('edit/<int:pk>/', FavoriteLineViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='favorite-line-edit'),
+    path('delete/<int:pk>/', FavoriteLineViewSet.as_view({'delete': 'destroy'}), name='favorite-line-delete'),
+]
+
+# Main urlpatterns
 urlpatterns = [
-    # Cart Line
-    path('cart-lines/<int:user_id>/', CartLineListView.as_view(), name='cart-line-list'),
-    path('cart-lines/add/', CartLineCreateView.as_view(), name='cart-line-add'),
-    path('cart-lines/update/<int:pk>/', CartLineUpdateView.as_view(), name='cart-line-update'),
-    path('cart-lines/delete/<int:pk>/', CartLineDeleteView.as_view(), name='cart-line-delete'),
+    # Cart Lines
+    path('cart-lines/', include((cart_line_urls, 'cart-lines'))),
 
-    # Favorite Line
-    path('favorite-lines/<int:user_id>/', FavoriteLineListView.as_view(), name='favorite-line-list'),
-    path('favorite-lines/add/', FavoriteLineCreateView.as_view(), name='favorite-line-add'),
-    path('favorite-lines/update/<int:pk>/', FavoriteLineUpdateView.as_view(), name='favorite-line-update'),
-    path('favorite-lines/delete/<int:pk>/', FavoriteLineDeleteView.as_view(), name='favorite-line-delete'),
+    # Favorite Lines
+    path('favorite-lines/', include((favorite_line_urls, 'favorite-lines'))),
 ]
