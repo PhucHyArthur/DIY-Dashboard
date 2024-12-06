@@ -12,16 +12,14 @@ from .serializers import (
 )
 
 class ScopedModelViewSet(ModelViewSet):
-    """
-    Base ViewSet để ánh xạ `required_scopes` cho từng hành động.
-    """
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasAnyScope]
 
     def get_permissions(self):
         """
-        Gán `required_scopes` theo từng hành động cụ thể.
+        Gán `required_scopes` theo hành động và cho phép ViewSet cụ thể bổ sung scope.
         """
+        # Các scope mặc định theo hành động
         action_scopes = {
             'list': [f'{self.scope_prefix}_read'],
             'retrieve': [f'{self.scope_prefix}_read'],
@@ -30,9 +28,15 @@ class ScopedModelViewSet(ModelViewSet):
             'partial_update': [f'{self.scope_prefix}_update'],
             'destroy': [f'{self.scope_prefix}_delete'],
         }
-        self.required_scopes = action_scopes.get(self.action, [])
-        return super().get_permissions()
 
+        # Lấy danh sách scope cho hành động hiện tại
+        self.required_scopes = action_scopes.get(self.action, [])
+
+        # Nếu có `extra_scopes` (ghi đè trong ViewSet con), thêm vào
+        extra_scopes = getattr(self, 'extra_scopes', [])
+        self.required_scopes.extend(extra_scopes)
+
+        return super().get_permissions()
 
 # Sales Order ViewSet
 class SalesOrderViewSet(ScopedModelViewSet):
@@ -42,6 +46,7 @@ class SalesOrderViewSet(ScopedModelViewSet):
     queryset = SalesOrder.objects.all()
     serializer_class = SalesOrderSerializer
     scope_prefix = 'sales_orders'
+    extra_scopes = ['enduser']
 
     def create(self, request, *args, **kwargs):
         """
@@ -93,6 +98,7 @@ class SalesOrderLineViewSet(ScopedModelViewSet):
     queryset = SalesOrderLine.objects.all()
     serializer_class = SalesOrderLineSerializer
     scope_prefix = 'sales_orders'
+    extra_scopes = ['enduser']
 
 
 # Purchase Order ViewSet
