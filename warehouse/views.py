@@ -21,7 +21,7 @@ class ScopedModelViewSet(ModelViewSet):
             'list': ['warehouse_read'],
             'retrieve': ['warehouse_read'],
             'create': ['warehouse_create'],
-            'update': ['warehouseupdate'],
+            'update': ['warehouse_update'],
             'partial_update': ['warehouse_update'],
             'destroy': ['warehouse_delete']
         }
