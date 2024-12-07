@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from oauth2_provider.models import AccessToken as OAuth2AccessToken
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import ArrayField
 
 class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -30,13 +29,3 @@ class Employee(AbstractUser):
         verbose_name = "Employee"
         verbose_name_plural = "Employees"
 
-class Client(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="client")
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = ArrayField(models.CharField(max_length=255), size=3, blank=True, null=True)  # Sử dụng ArrayField
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_delete = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.user.username

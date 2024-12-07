@@ -16,7 +16,7 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import status
 from rest_framework.response import Response
 
-from users.models import Client, Role
+from users.models import Employee, Role
 from .serializers import ClientDetailSerializer, ClientRegisterSerializer, EmployeeListSerializer, RoleSerializer, UserRegisterSerializer
 from .validators import TokenHasAnyScope
 
@@ -165,8 +165,8 @@ class ClientRegisterView(APIView):
             client = serializer.save()
             return Response(
                 {
-                    "message": f"Client {client.user.username} registered successfully.",
-                    "client_id": client.id,
+                    "message": f"Client {client.username} registered successfully.",
+                    "id": client.id,  # Trả về thêm ID của client
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -178,7 +178,7 @@ class ClientViewSet(ModelViewSet):
     """
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasAnyScope]
-    queryset = Client.objects.all()
+    queryset = Employee.objects.all()
     serializer_class = ClientDetailSerializer
 
     def get_permissions(self):
@@ -196,30 +196,17 @@ class ClientViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        """
-        Giới hạn queryset để:
-        - Nhân viên có thể xem toàn bộ danh sách (nếu có quyền).
-        - Enduser chỉ xem được chính họ.
-        """
         if 'enduser' in self.required_scopes:
-            # Nếu là enduser, chỉ trả về thông tin của chính họ
-            return self.queryset.filter(user=self.request.user)
-        # Mặc định, nhân viên có thể truy cập toàn bộ danh sách
+            return self.queryset.filter(id=self.request.user.id)
         return self.queryset
 
     def perform_update(self, serializer):
-        """
-        Đảm bảo chỉ enduser có thể cập nhật thông tin của chính họ.
-        """
         instance = self.get_object()
-        if self.request.user.id != instance.user.id:
+        if self.request.user.id != instance.id:  # Sửa instance.user.id thành instance.id
             raise PermissionDenied("You do not have permission to update this client.")
         serializer.save()
 
     def perform_destroy(self, instance):
-        """
-        Đảm bảo chỉ enduser có thể xóa tài khoản của chính họ.
-        """
-        if self.request.user.id != instance.user.id:
+        if self.request.user.id != instance.id:  # Sửa instance.user.id thành instance.id
             raise PermissionDenied("You do not have permission to delete this client.")
         instance.delete()

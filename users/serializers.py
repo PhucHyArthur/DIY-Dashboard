@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Role, Client
-from oauth2_provider.models import Application
+from .models import Role
 
 class RoleSerializer(serializers.ModelSerializer):
     scopes = serializers.ListField(
@@ -37,6 +36,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         user = get_user_model().objects.create_user(**validated_data)
         user.role = role
+        user.is_staff = True
         user.save()
         return user
 
@@ -48,36 +48,25 @@ class EmployeeListSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'role', 'phone_number', 'address', 'hire_date']
 
 class ClientRegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
-
     class Meta:
-        model = Client
-        fields = ['username', 'password']
+        model = get_user_model()
+        fields = ['username', 'password']  # Chỉ yêu cầu hai trường này
 
     def create(self, validated_data):
-        username = validated_data.pop('username')
-        password = validated_data.pop('password')
-
         try:
-            role = Role.objects.get(name='EndUser')
+            role = Role.objects.get(name="EndUser")
         except Role.DoesNotExist:
-            raise serializers.ValidationError({"role_name": "Role 'EndUser' does not exist."})
+            raise serializers.ValidationError({"role_name": "Default role 'EndUser' does not exist."})
 
-        User = get_user_model()
-
-        user = User.objects.create_user(username=username, password=password)
-        user.role = role  
+        user = get_user_model().objects.create_user(**validated_data)
+        user.role = role 
+        user.is_staff = False
         user.save()
-
-        client = Client.objects.create(user=user)
-        return client
+        return user
 
 class ClientDetailSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.CharField(source='user.first_name', read_only=True)
-    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    role = serializers.CharField(source='role.name', read_only=True)
 
     class Meta:
-        model = Client
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'address', 'created_at']
+        model = get_user_model()
+        fields = ['username', 'first_name', 'last_name', 'phone_number', 'address', 'email', 'role']
