@@ -38,8 +38,7 @@ class RawMaterialsLine(models.Model):
         RawMaterials, 
         on_delete=models.CASCADE, 
         related_name="raw_materials_lines", 
-        blank=True, 
-        null=True
+        blank=False
     )
     id = models.AutoField(primary_key=True)
     quantity = models.IntegerField()
@@ -47,8 +46,7 @@ class RawMaterialsLine(models.Model):
         Suppliers, 
         on_delete=models.CASCADE, 
         related_name="raw_materials_lines", 
-        blank=True, 
-        null=True
+        blank=False
     )
     location = models.ForeignKey(
         Location, 
