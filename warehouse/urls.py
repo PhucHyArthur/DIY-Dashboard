@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import WarehouseViewSet, ZoneViewSet, AisleViewSet, RackViewSet
+from .views import LocationViewSet, WarehouseViewSet, ZoneViewSet, AisleViewSet, RackViewSet
 
 # Warehouse URLs
 warehouse_urls = [
@@ -38,6 +38,14 @@ rack_urls = [
     path('delete/<int:pk>/', RackViewSet.as_view({'delete': 'destroy'}), name='rack-delete'),
 ]
 
+location_urls = [
+    path('list/', LocationViewSet.as_view({'get': 'list'}), name='location-list'),
+    path('create/', LocationViewSet.as_view({'post': 'create'}), name='location-create'),
+    path('detail/<int:pk>/', LocationViewSet.as_view({'get': 'retrieve'}), name='location-detail'),
+    path('edit/<int:pk>/', LocationViewSet.as_view({'put': 'update', 'patch': 'partial_update'}), name='location-edit'),
+    path('delete/<int:pk>/', LocationViewSet.as_view({'delete': 'destroy'}), name='location-delete'),
+]
+
 # Main urlpatterns
 urlpatterns = [
     # Warehouse URLs
@@ -51,4 +59,7 @@ urlpatterns = [
 
     # Rack URLs
     path('racks/', include((rack_urls, 'racks'))),
+
+    # Location URLs
+    path('locations/', include((location_urls, 'locations'))),
 ]

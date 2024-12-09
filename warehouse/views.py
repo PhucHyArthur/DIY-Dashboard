@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status, serializers
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from users.validators import TokenHasAnyScope
-from .models import Warehouse, Zone, Aisle, Rack
-from .serializers import WarehouseSerializer, ZoneSerializer, AisleSerializer, RackSerializer
+from .models import Warehouse, Zone, Aisle, Rack, Location
+from .serializers import WarehouseSerializer, ZoneSerializer, AisleSerializer, RackSerializer, LocationSerializer
 
 class ScopedModelViewSet(ModelViewSet):
     """
@@ -28,6 +28,12 @@ class ScopedModelViewSet(ModelViewSet):
         self.required_scopes = action_scopes.get(self.action, [])
         return super().get_permissions()
 
+class LocationViewSet(ScopedModelViewSet):
+    """
+    ViewSet để quản lý Location (CRUD).
+    """
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
 
 # Warehouse ViewSet
 class WarehouseViewSet(ScopedModelViewSet):
