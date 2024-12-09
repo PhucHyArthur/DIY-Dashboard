@@ -106,6 +106,14 @@ class FinishedProductsViewSet(ScopedModelViewSet):
             'destroy': ['finished_products_delete'],
         }
 
+    def get_permissions(self):
+        """
+        Bỏ qua kiểm tra permission cho action 'list'.
+        """
+        if self.action == 'list':
+            return []  # Không kiểm tra permission
+        return super().get_permissions()
+
     def get_queryset(self):
         """
         Tùy chỉnh queryset để chỉ trả về các sản phẩm hoàn thiện chưa bị xóa.

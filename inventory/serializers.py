@@ -23,6 +23,8 @@ class ImageSerializer(serializers.ModelSerializer):
         """
         Trả về URL dưới dạng chuỗi (JSON serializable).
         """
+        if not obj.url:
+            return None
         return str(obj.url)  # Chuyển `CloudinaryResource` thành chuỗi
 
 
@@ -170,49 +172,73 @@ class RawMaterialsSerializer(serializers.ModelSerializer):
 
 class FinishedProductsSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
-    images = ImageSerializer(many=True)
+    images = ImageSerializer(many=True, read_only=True)  # Trả về danh sách URL ảnh
+    uploaded_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False
+    )  # Xử lý upload ảnh từ client
 
     class Meta:
         model = FinishedProducts
         fields = [
             'id', 'name', 'category', 'selling_price', 'total_quantity',
             'unit', 'location', 'description', 'expired_date',
-            'is_available', 'is_deleted', 'created_at', 'updated_at', 'images'
+            'is_available', 'is_deleted', 'created_at', 'updated_at', 'images', 'uploaded_images'
         ]
         read_only_fields = ['created_at', 'updated_at']
 
     def create(self, validated_data):
         """
-        Tạo mới FinishedProducts và xử lý nested images.
+        Tạo mới FinishedProducts và xử lý upload images lên Cloudinary.
         """
-        images_data = validated_data.pop('images', [])
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
         location_data = validated_data.pop('location', None)
 
+        # Xử lý location nếu có
         if location_data:
             location, created = Location.objects.get_or_create(**location_data)
             validated_data['location'] = location
 
         finished_product = FinishedProducts.objects.create(**validated_data)
-        for image_data in images_data:
-            Image.objects.create(finished_product=finished_product, **image_data)
+
+        # Upload ảnh lên Cloudinary và lưu vào database
+        for image in uploaded_images:
+            try:
+                upload_result = upload(image)
+                Image.objects.create(
+                    finished_product=finished_product,
+                    url=upload_result.get('secure_url')
+                )
+            except Exception as e:
+                raise serializers.ValidationError(f"Failed to upload image: {str(e)}")
 
         return finished_product
 
     def update(self, instance, validated_data):
         """
-        Cập nhật FinishedProducts và xử lý nested images.
+        Cập nhật FinishedProducts và xử lý upload images lên Cloudinary.
         """
-        images_data = validated_data.pop('images', [])
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
         location_data = validated_data.pop('location', None)
 
+        # Xử lý location nếu có
         if location_data:
             location, created = Location.objects.get_or_create(**location_data)
             validated_data['location'] = location
 
-        instance = super().update(instance, validated_data)
+        # Cập nhật các trường thông tin khác
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-        instance.images.all().delete()
-        for image_data in images_data:
-            Image.objects.create(finished_product=instance, **image_data)
+        # Upload ảnh mới lên Cloudinary và lưu vào database
+        for image in uploaded_images:
+            try:
+                upload_result = upload(image)
+                Image.objects.create(
+                    finished_product=instance,
+                    url=upload_result.get('secure_url')
+                )
+            except Exception as e:
+                raise serializers.ValidationError(f"Failed to upload image: {str(e)}")
 
         return instance
