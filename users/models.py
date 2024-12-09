@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from oauth2_provider.models import AccessToken as OAuth2AccessToken
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 
 class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -18,7 +19,12 @@ class Role(models.Model):
 class Employee(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name="employees")
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.TextField(max_length=255, blank=True, null=True)
+    address = ArrayField(
+        models.CharField(max_length=255),
+        blank=True,
+        null=True,
+        default=list,  
+    )    
     hire_date = models.DateField(null=True, blank=True)
     is_delete = models.BooleanField(default=False)
 
