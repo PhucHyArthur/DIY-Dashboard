@@ -60,6 +60,7 @@ class RawMaterialsLine(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
     is_available = models.BooleanField(_("Is Available"), default=True)
+    expired_date = models.DateField(_("Expiry Date"), blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.quantity and self.price_per_unit:
@@ -95,7 +96,7 @@ class FinishedProducts(models.Model):
         verbose_name = _("Finished Product")
         verbose_name_plural = _("Finished Products")
 
-class Image(models.Model):
+class Image(models.Model):  
     url = CloudinaryField('image')
     raw_material = models.ForeignKey(
         RawMaterials, on_delete=models.CASCADE, related_name='images', blank=True, null=True
@@ -107,7 +108,3 @@ class Image(models.Model):
 
     def __str__(self):
         return str(self.url)
-
-    class Meta:
-        verbose_name = _("Image")
-        verbose_name_plural = _("Images")

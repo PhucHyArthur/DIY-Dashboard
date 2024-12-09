@@ -3,6 +3,8 @@ from rest_framework import serializers
 from suppliers.models import Suppliers
 from .models import RawMaterials, RawMaterialsLine, FinishedProducts, Image
 from warehouse.models import Location
+from cloudinary.uploader import upload
+from rest_framework.exceptions import ValidationError
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -12,9 +14,16 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
     class Meta:
         model = Image
-        fields = ['id', 'url']
+        fields = ['url']
+
+    def get_url(self, obj):
+        """
+        Trả về URL dưới dạng chuỗi (JSON serializable).
+        """
+        return str(obj.url)  # Chuyển `CloudinaryResource` thành chuỗi
 
 
 class RawMaterialsLineSerializer(serializers.ModelSerializer):
@@ -106,43 +115,58 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
 
 class RawMaterialsSerializer(serializers.ModelSerializer):
     raw_materials_lines = RawMaterialsLineSerializer(many=True, read_only=True)
-    images = ImageSerializer(many=True)
+    images = ImageSerializer(many=True, read_only=True)  # Trả về danh sách URL ảnh
+    uploaded_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False
+    )
 
     class Meta:
         model = RawMaterials
         fields = [
             'id', 'name', 'category', 'description', 'total_quantity',
             'total_amount', 'created_at', 'updated_at', 'is_available',
-            'is_deleted', 'raw_materials_lines', 'images'
+            'is_deleted', 'raw_materials_lines', 'images', 'uploaded_images'
         ]
         read_only_fields = ['total_quantity', 'total_amount', 'created_at', 'updated_at']
 
+    def get_image_urls(self, obj):
+        """Trả về danh sách URL ảnh từ bảng Image"""
+        return [image.url for image in obj.images.all()]
+
     def create(self, validated_data):
-        """
-        Tạo mới RawMaterials và xử lý nested images.
-        """
-        images_data = validated_data.pop('images', [])
+        images = validated_data.pop('images', [])
         raw_material = RawMaterials.objects.create(**validated_data)
 
-        for image_data in images_data:
-            Image.objects.create(raw_material=raw_material, **image_data)
+        for image in images:
+            try:
+                upload_result = upload(image)  # Upload lên Cloudinary
+                Image.objects.create(
+                    raw_material=raw_material,
+                    url=upload_result.get('secure_url')
+                )
+            except Exception as e:
+                raise serializers.ValidationError(f"Failed to upload image: {str(e)}")
 
         return raw_material
 
     def update(self, instance, validated_data):
-        """
-        Cập nhật RawMaterials và xử lý nested images.
-        """
-        images_data = validated_data.pop('images', [])
+        images = validated_data.pop('images', [])
 
-        instance = super().update(instance, validated_data)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-        instance.images.all().delete()
-        for image_data in images_data:
-            Image.objects.create(raw_material=instance, **image_data)
+        for image in images:
+            try:
+                upload_result = upload(image)
+                Image.objects.create(
+                    raw_material=instance,
+                    url=upload_result.get('secure_url')
+                )
+            except Exception as e:
+                raise serializers.ValidationError(f"Failed to upload image: {str(e)}")
 
         return instance
-
 
 class FinishedProductsSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
