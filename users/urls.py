@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ClientRegisterView, ClientViewSet, CustomTokenView, RoleViewSet, EmployeeViewSet
+from .views import ChangePasswordView, ClientRegisterView, ClientViewSet, CustomTokenView, RoleViewSet, EmployeeViewSet
 
 # Role URLs
 role_urls = [
@@ -44,4 +44,7 @@ urlpatterns = [
 
     # Client Registration (separate API)
     path('clients/register/', ClientRegisterView.as_view(), name='client-register'),
+
+    # Change Password URL
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]

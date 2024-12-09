@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
+from django.contrib.auth.hashers import check_password
 
 from oauth2_provider.views import TokenView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
@@ -210,3 +211,48 @@ class ClientViewSet(ModelViewSet):
         if self.request.user.id != instance.id:  # Sửa instance.user.id thành instance.id
             raise PermissionDenied("You do not have permission to delete this client.")
         instance.delete()
+
+
+class ChangePasswordView(APIView):
+    """
+    API để người dùng đổi mật khẩu.
+    """
+    authentication_classes = [OAuth2Authentication]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+
+        # Xác minh dữ liệu đầu vào
+        if not all(k in data for k in ("current_password", "new_password", "confirm_password")):
+            return Response(
+                {"error": "Missing required fields (current_password, new_password, confirm_password)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        current_password = data.get("current_password")
+        new_password = data.get("new_password")
+        confirm_password = data.get("confirm_password")
+
+        # Kiểm tra mật khẩu hiện tại
+        if not check_password(current_password, user.password):
+            return Response(
+                {"error": "Current password is incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Kiểm tra mật khẩu mới và xác nhận
+        if new_password != confirm_password:
+            return Response(
+                {"error": "New password and confirm password do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Đổi mật khẩu
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"message": "Password changed successfully."},
+            status=status.HTTP_200_OK,
+        )
