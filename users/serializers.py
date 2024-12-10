@@ -19,6 +19,11 @@ class RoleSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['scopes'] = instance.get_scopes()
         return representation
+    
+    def update(self, instance, validated_data):
+        validated_data['scopes'] = ' '.join(validated_data.pop('scopes'))
+        return super().update(instance, validated_data)
+    
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     role_name = serializers.CharField(write_only=True) 
