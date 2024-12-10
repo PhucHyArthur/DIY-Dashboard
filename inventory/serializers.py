@@ -11,6 +11,8 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ['id', 'rack', 'bin_number', 'description', 'quantity', 'is_deleted', 'is_fulled']
+        ref_name = 'WarehouseLocation'
+
 
 
 class ImageSerializer(serializers.ModelSerializer):

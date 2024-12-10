@@ -197,6 +197,10 @@ class ClientViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
+        # Khởi tạo `required_scopes` mặc định nếu chưa có
+        self.required_scopes = getattr(self, 'required_scopes', [])
+        
+        # Logic lọc queryset
         if 'enduser' in self.required_scopes:
             return self.queryset.filter(id=self.request.user.id)
         return self.queryset
