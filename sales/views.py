@@ -55,4 +55,4 @@ class FavoriteLineViewSet(ScopedModelViewSet):
         Gắn user hiện tại vào Favorite_Line khi tạo mới.
         """
         serializer.save(user=self.request.user)
- 
+  
