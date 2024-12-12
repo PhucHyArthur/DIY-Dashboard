@@ -85,3 +85,4 @@ class PurchaseOrderLine(models.Model):
 
     def __str__(self):
         return f"Line for Purchase Order {self.purchase_order.order_number} - Material: {self.material}"
+    
