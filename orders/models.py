@@ -23,7 +23,7 @@ class SalesOrder(models.Model):
     def __str__(self):
         return f"Order {self.order_number} - Customer: {self.client}"
 
-
+ 
 class SalesOrderLine(models.Model):
     id = models.AutoField(primary_key=True)
     sales_order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, related_name='order_lines')
