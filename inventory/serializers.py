@@ -245,3 +245,5 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
 
         return instance
 
+
+
