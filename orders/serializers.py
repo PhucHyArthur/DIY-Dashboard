@@ -81,7 +81,7 @@ class PurchaseOrderLineSerializer(serializers.ModelSerializer) :
 
     class Meta:
         model = PurchaseOrderLine
-        fields = ['material', 'quantity']
+        fields = ['material', 'quantity', 'unit_price']
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
     supplier = serializers.PrimaryKeyRelatedField(queryset=Suppliers.objects.all())  # Đổi tên trường thành supplier_id
@@ -98,10 +98,11 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         for order_line_data in order_lines_data:
             material = order_line_data.get('material')
             quantity = order_line_data.get('quantity')
+            unit_price = order_line_data.get('unit_price')
 
             try:
                 material = RawMaterials.objects.get(id=material.id)
-                unit_price = material.price_per_unit
+                
             except RawMaterials.DoesNotExist:
                 raise serializers.ValidationError(f"Material với ID {material} không tồn tại.")
             line_total = unit_price * quantity

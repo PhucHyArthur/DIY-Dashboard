@@ -32,8 +32,8 @@ class ImageSerializer(serializers.ModelSerializer):
 
 class RawMaterialsLineSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
-    supplier_id = serializers.IntegerField(write_only=True)  # Chỉ cần supplier_id trong payload
-    supplier_name = serializers.CharField(source='supplier.name', read_only=True)  # Hiển thị tên nhà cung cấp
+    supplier_id = serializers.IntegerField(write_only=True)  
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True) 
     raw_material_id = serializers.IntegerField(write_only=True)
 
     class Meta:
@@ -194,9 +194,11 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         """
         uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
         location_data = validated_data.pop('location', None)
+        total_quantity = validated_data.get('total_quantity')  # Lấy giá trị total_quantity
 
         # Xử lý location nếu có
         if location_data:
+            location_data['quantity'] = total_quantity
             location, created = Location.objects.get_or_create(**location_data)
             validated_data['location'] = location
 
@@ -221,11 +223,20 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         """
         uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
         location_data = validated_data.pop('location', None)
-
+        total_quantity = validated_data.get('total_quantity')  # Lấy giá trị total_quantity
         # Xử lý location nếu có
         if location_data:
-            location, created = Location.objects.get_or_create(**location_data)
-            validated_data['location'] = location
+            location = instance.location
+            if location:
+                location.quantity = total_quantity
+                for attr, value in location_data.items():
+                    setattr(location, attr, value)
+                location.save()
+            else:
+                # Tạo mới location nếu chưa có
+                location_data['quantity'] = total_quantity
+                location = Location.objects.create(**location_data)
+                instance.location = location
 
         # Cập nhật các trường thông tin khác
         for attr, value in validated_data.items():
