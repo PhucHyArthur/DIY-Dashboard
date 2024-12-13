@@ -173,7 +173,7 @@ class EmployeeViewSet(ModelViewSet):
         user = serializer.save(is_active=False)  # Tài khoản chưa kích hoạt
         
         # Tạo link kích hoạt tài khoản
-        activation_link = f"https://diy-frontend-five.vercel.app/activate-account/{user.id}/{account_activation_token.make_token(user)}"
+        activation_link = f"https://diy-frontend-five.vercel.app/activate-account?uid={user.id}&token={account_activation_token.make_token(user)}"
         
         # Gửi email kích hoạt
         send_activation_email(user, activation_link)
