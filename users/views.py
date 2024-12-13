@@ -2,14 +2,19 @@ import json
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.forms import ValidationError
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.datastructures import MultiValueDict
 from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.contrib.auth.hashers import check_password
+from django.urls import reverse
+from django.core.mail import EmailMultiAlternatives
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
-from django.contrib.auth.hashers import check_password
 
 from oauth2_provider.views import TokenView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
@@ -20,6 +25,7 @@ from rest_framework.response import Response
 from users.models import Employee, Role
 from .serializers import ClientDetailSerializer, ClientRegisterSerializer, EmployeeListSerializer, RoleSerializer, UserRegisterSerializer
 from .validators import TokenHasAnyScope
+from .tokens import account_activation_token
 
 User = get_user_model()
 
@@ -110,7 +116,22 @@ class RoleViewSet(ModelViewSet):
             {"message": "Role deleted successfully."},
             status=status.HTTP_204_NO_CONTENT
         )
-    
+
+def send_activation_email(user, activation_link):
+    subject = "Activate Your Account"
+    from_email = "diystore2024@gmail.com"
+    to_email = [user.email]
+
+    text_content = f"Hi {user.username},\n\nClick the link below to activate your account:\n{activation_link}"
+    html_content = f"""
+    <p>Hi {user.username},</p>
+    <p>Click the link below to activate your account:</p>
+    <a href="{activation_link}">Activate Your Account</a>
+    """
+
+    email = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    email.attach_alternative(html_content, "text/html")
+    email.send()    
 ## Employee ViewSet
 class EmployeeViewSet(ModelViewSet):
     """
@@ -149,9 +170,17 @@ class EmployeeViewSet(ModelViewSet):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        user = serializer.save(is_active=False)  # Tài khoản chưa kích hoạt
+        
+        # Tạo link kích hoạt tài khoản
+        activation_link = f"http://localhost:3000/activate-account/{user.id}/{account_activation_token.make_token(user)}"
+        
+        # Gửi email kích hoạt
+        send_activation_email(user, activation_link)
+
+        
         return Response(
-            {"message": f"User {user.username} created successfully."},
+            {"message": f"User {user.username} created successfully. Activation email sent."},
             status=status.HTTP_201_CREATED
         )
     
@@ -260,3 +289,38 @@ class ChangePasswordView(APIView):
             {"message": "Password changed successfully."},
             status=status.HTTP_200_OK,
         )
+    
+class ActivateAccountView(APIView):
+    def get(self, request, uid, token, *args, **kwargs):
+        try:
+            user = get_object_or_404(User, pk=uid)
+            
+            if user.is_active:
+                return Response(
+                    {"message": "Account is already activated."},
+                    status=status.HTTP_200_OK
+                )
+            
+            # Kiểm tra token
+            if account_activation_token.check_token(user, token):
+                user.is_active = True
+                user.save()
+                return Response(
+                    {"message": "Account activated successfully!"},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                raise ValidationError("Token is invalid or has expired.")
+        
+        except ValidationError as e:
+            return Response(
+                {"message": "Activation failed.", "error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        except Exception as e:
+            # Xử lý các lỗi khác
+            return Response(
+                {"message": "An unexpected error occurred.", "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

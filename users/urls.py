@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ChangePasswordView, ClientRegisterView, ClientViewSet, CustomTokenView, RoleViewSet, EmployeeViewSet
+from .views import ActivateAccountView, ChangePasswordView, ClientRegisterView, ClientViewSet, CustomTokenView, RoleViewSet, EmployeeViewSet
 
 # Role URLs
 role_urls = [
@@ -47,4 +47,7 @@ urlpatterns = [
 
     # Change Password URL
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+
+    # Activate Account URL
+    path('activate/<int:uid>/<str:token>/', ActivateAccountView.as_view(), name='activate_account'),
 ]

@@ -30,7 +30,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['username', 'password', 'role_name']
+        fields = ['username', 'password', 'role_name', 'email']
 
     def create(self, validated_data):
         role_name = validated_data.pop('role_name')
@@ -50,7 +50,7 @@ class EmployeeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'username', 'email', 'role', 'phone_number', 'address', 'hire_date']
+        fields = ['id', 'username', 'email', 'role', 'phone_number', 'address', 'hire_date', 'is_active', 'is_delete']
 
 class ClientRegisterSerializer(serializers.ModelSerializer):
     class Meta:
