@@ -13,7 +13,7 @@ class SalesOrderLineSerializer(serializers.ModelSerializer):
 
 class SalesOrderSerializer(serializers.ModelSerializer):
     client = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all())
-    order_lines = SalesOrderLineSerializer(many=True, required=False)  # Đặt trường này không bắt buộc
+    order_lines = SalesOrderLineSerializer(many=True, required=False)
 
     class Meta:
         model = SalesOrder
@@ -25,21 +25,18 @@ class SalesOrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order_lines_data = validated_data.pop('order_lines', [])
         sales_order = SalesOrder.objects.create(**validated_data)
-        sales_order.save()
 
         for order_line_data in order_lines_data:
-            product = order_line_data.get('product')
-            quantity = order_line_data.get('quantity')
+            product = order_line_data['product']
+            quantity = order_line_data['quantity']
 
-            try:
-                product = FinishedProducts.objects.get(id=product.id)
-                unit_price = product.selling_price
-            except FinishedProducts.DoesNotExist:
-                raise serializers.ValidationError(f"Product với ID {product} không tồn tại.")
+            # Lấy giá bán của sản phẩm
+            unit_price = product.selling_price
             line_total = unit_price * quantity
+
             SalesOrderLine.objects.create(
-                sales_order_id=sales_order.id,
-                product_id=product.id,
+                sales_order=sales_order,
+                product=product,
                 quantity=quantity,
                 unit_price=unit_price,
                 line_total=line_total,
@@ -50,33 +47,34 @@ class SalesOrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         order_lines_data = validated_data.pop('order_lines', None)
 
+        # Cập nhật thông tin của SalesOrder
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
 
         if order_lines_data is not None:
-            SalesOrderLine.objects.filter(sales_order_id=instance.id).delete()
+            # Xóa các dòng order cũ
+            instance.order_lines.all().delete()
 
+            # Tạo các dòng order mới
             for order_line_data in order_lines_data:
-                product = order_line_data.get('product')
-                quantity = order_line_data.get('quantity')
+                product = order_line_data['product']
+                quantity = order_line_data['quantity']
 
-                try:
-                    product = FinishedProducts.objects.get(id=product.id)
-                    unit_price = product.selling_price
-                except FinishedProducts.DoesNotExist:
-                    raise serializers.ValidationError(f"Product với ID {product} không tồn tại.")
+                unit_price = product.selling_price
                 line_total = unit_price * quantity
+
                 SalesOrderLine.objects.create(
-                    sales_order_id=instance.id,
-                    product_id=product.id,
+                    sales_order=instance,
+                    product=product,
                     quantity=quantity,
                     unit_price=unit_price,
                     line_total=line_total,
                 )
+
         return instance
-    
-class PurchaseOrderLineSerializer(serializers.ModelSerializer) : 
+
+class PurchaseOrderLineSerializer(serializers.ModelSerializer):
     material = serializers.PrimaryKeyRelatedField(queryset=RawMaterials.objects.all())
 
     class Meta:
@@ -84,36 +82,60 @@ class PurchaseOrderLineSerializer(serializers.ModelSerializer) :
         fields = ['material', 'quantity', 'unit_price']
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
-    supplier = serializers.PrimaryKeyRelatedField(queryset=Suppliers.objects.all())  # Đổi tên trường thành supplier_id
-    order_lines = PurchaseOrderLineSerializer(many=True, required=False)  # Đặt trường này không bắt buộc
+    supplier = serializers.PrimaryKeyRelatedField(queryset=Suppliers.objects.all())
+    order_lines = PurchaseOrderLineSerializer(many=True, required=False)
 
     class Meta:
         model = PurchaseOrder
         fields = ['id', 'order_number', 'supplier', 'order_date', 'due_date', 'status', 'remarks', 'is_deleted', 'order_lines']
+
     def create(self, validated_data):
         order_lines_data = validated_data.pop('order_lines', [])
         purchase_order = PurchaseOrder.objects.create(**validated_data)
-        purchase_order.save()
-        print(purchase_order)
-        for order_line_data in order_lines_data:
-            material = order_line_data.get('material')
-            quantity = order_line_data.get('quantity')
-            unit_price = order_line_data.get('unit_price')
 
-            try:
-                material = RawMaterials.objects.get(id=material.id)
-                
-            except RawMaterials.DoesNotExist:
-                raise serializers.ValidationError(f"Material với ID {material} không tồn tại.")
+        for order_line_data in order_lines_data:
+            material = order_line_data['material']
+            quantity = order_line_data['quantity']
+            unit_price = order_line_data['unit_price']
+
             line_total = unit_price * quantity
+
             PurchaseOrderLine.objects.create(
-                purchase_order_id=purchase_order.id,
-                material_id=material.id,
+                purchase_order=purchase_order,
+                material=material,
                 quantity=quantity,
                 unit_price=unit_price,
                 line_total=line_total,
-            ) 
+            )
 
         return purchase_order
 
+    def update(self, instance, validated_data):
+        order_lines_data = validated_data.pop('order_lines', None)
 
+        # Cập nhật thông tin của PurchaseOrder
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+
+        if order_lines_data is not None:
+            # Xóa các dòng order cũ
+            instance.order_lines.all().delete()
+
+            # Tạo các dòng order mới
+            for order_line_data in order_lines_data:
+                material = order_line_data['material']
+                quantity = order_line_data['quantity']
+                unit_price = order_line_data['unit_price']
+
+                line_total = unit_price * quantity
+
+                PurchaseOrderLine.objects.create(
+                    purchase_order=instance,
+                    material=material,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    line_total=line_total,
+                )
+
+        return instance
