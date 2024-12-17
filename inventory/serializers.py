@@ -255,3 +255,4 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Failed to upload image: {str(e)}")
 
         return instance
+    
