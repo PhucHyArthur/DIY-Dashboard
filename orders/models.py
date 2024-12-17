@@ -11,6 +11,7 @@ class SalesOrder(models.Model):
     due_date = models.DateField()
     status = models.CharField(max_length=100)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_paid = models.BooleanField(default=False)
     remarks = models.TextField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -19,7 +19,7 @@ class SalesOrderSerializer(serializers.ModelSerializer):
         model = SalesOrder
         fields = [
             'id', 'order_number', 'client', 'order_date', 'due_date',
-            'status', 'total_amount', 'remarks', 'is_deleted', 'order_lines'
+            'status', 'total_amount', 'remarks', 'is_deleted', 'order_lines', 'is_paid'
         ]
 
     def create(self, validated_data):
