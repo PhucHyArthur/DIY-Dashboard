@@ -5,6 +5,8 @@ from .models import RawMaterials, RawMaterialsLine, FinishedProducts, Image
 from warehouse.models import Location
 from cloudinary.uploader import upload
 from rest_framework.exceptions import ValidationError
+import base64
+from django.core.files.base import ContentFile
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -173,41 +175,45 @@ class RawMaterialsSerializer(serializers.ModelSerializer):
         return instance
 
 class FinishedProductsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
+    location = LocationSerializer(required=False)
     images = ImageSerializer(many=True, read_only=True)  # Trả về danh sách URL ảnh
     uploaded_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False
-    )  # Xử lý upload ảnh từ client
+    )
 
     class Meta:
         model = FinishedProducts
         fields = [
             'id', 'name', 'category', 'selling_price', 'total_quantity',
             'unit', 'location', 'description', 'expired_date',
-            'is_available', 'is_deleted', 'created_at', 'updated_at', 'images', 'uploaded_images'
+            'is_available', 'is_deleted', 'created_at', 'updated_at',
+            'images', 'uploaded_images'
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+    def get_image_urls(self, obj):
+        """Trả về danh sách URL ảnh từ bảng Image"""
+        return [image.url for image in obj.images.all()]
+
     def create(self, validated_data):
         """
-        Tạo mới FinishedProducts và xử lý upload images lên Cloudinary.
+        Tạo mới sản phẩm và upload các ảnh từ uploaded_images.
         """
-        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
-        location_data = validated_data.pop('location', None)
-        total_quantity = validated_data.get('total_quantity')  # Lấy giá trị total_quantity
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh
+        location_data = validated_data.pop('location', None)  # Xử lý location
 
         # Xử lý location nếu có
         if location_data:
-            location_data['quantity'] = total_quantity
             location, created = Location.objects.get_or_create(**location_data)
             validated_data['location'] = location
 
+        # Tạo mới FinishedProducts
         finished_product = FinishedProducts.objects.create(**validated_data)
 
-        # Upload ảnh lên Cloudinary và lưu vào database
+        # Upload từng ảnh từ uploaded_images và lưu vào Image model
         for image in uploaded_images:
             try:
-                upload_result = upload(image)
+                upload_result = upload(image)  # Upload ảnh lên Cloudinary
                 Image.objects.create(
                     finished_product=finished_product,
                     url=upload_result.get('secure_url')
@@ -219,34 +225,31 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        Cập nhật FinishedProducts và xử lý upload images lên Cloudinary.
+        Cập nhật sản phẩm và upload các ảnh từ uploaded_images.
         """
-        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh upload
-        location_data = validated_data.pop('location', None)
-        total_quantity = validated_data.get('total_quantity')  # Lấy giá trị total_quantity
-        # Xử lý location nếu có
+        uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh
+        location_data = validated_data.pop('location', None)  # Xử lý location
+
+        # Cập nhật location nếu có
         if location_data:
             location = instance.location
             if location:
-                location.quantity = total_quantity
                 for attr, value in location_data.items():
                     setattr(location, attr, value)
                 location.save()
             else:
-                # Tạo mới location nếu chưa có
-                location_data['quantity'] = total_quantity
-                location = Location.objects.create(**location_data)
+                location, created = Location.objects.get_or_create(**location_data)
                 instance.location = location
 
-        # Cập nhật các trường thông tin khác
+        # Cập nhật các trường thông tin sản phẩm
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Upload ảnh mới lên Cloudinary và lưu vào database
+        # Upload từng ảnh từ uploaded_images và lưu vào Image model
         for image in uploaded_images:
             try:
-                upload_result = upload(image)
+                upload_result = upload(image)  # Upload ảnh lên Cloudinary
                 Image.objects.create(
                     finished_product=instance,
                     url=upload_result.get('secure_url')
