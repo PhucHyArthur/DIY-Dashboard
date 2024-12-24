@@ -111,13 +111,6 @@ class PurchaseOrderViewSet(ScopedModelViewSet):
         serializer.is_valid(raise_exception=True)
         purchase_order = serializer.save()
 
-        # Xử lý các dòng order_lines nếu có
-        order_lines_data = request.data.get('order_lines', [])
-        for order_line_data in order_lines_data:
-            order_line_serializer = PurchaseOrderLineSerializer(data=order_line_data)
-            order_line_serializer.is_valid(raise_exception=True)
-            order_line_serializer.save(purchase_order=purchase_order)
-
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -129,19 +122,7 @@ class PurchaseOrderViewSet(ScopedModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        # Xử lý các dòng order_lines nếu có
-        order_lines_data = request.data.get('order_lines', None)
-        if order_lines_data is not None:
-            # Xóa các dòng cũ
-            PurchaseOrderLine.objects.filter(purchase_order=instance).delete()
-            # Tạo các dòng mới
-            for order_line_data in order_lines_data:
-                order_line_serializer = PurchaseOrderLineSerializer(data=order_line_data)
-                order_line_serializer.is_valid(raise_exception=True)
-                order_line_serializer.save(purchase_order=instance)
-
+        serializer.save()
         return Response(serializer.data)
 
 
