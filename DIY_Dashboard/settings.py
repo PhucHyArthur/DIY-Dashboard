@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-lpyv$$@lck621nq$l&i7t8)luq+q@m$u5^%=zi!*5io3c97$zb"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['.vercel.app', 'localhost', '54.224.77.45', '127.0.0.1']
 
@@ -69,11 +69,11 @@ INSTALLED_APPS = [
     'payment',
 ]
 
-DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
-DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
+# DEFAULT_CLIENT_ID = "vGlxBQXyos9e3YXgXkWD1UplUimONkwQU5LQ8NRQ"
+# DEFAULT_CLIENT_SECRET = "54UTJTGd5aYpd57EyU934Zyfbo9K3BFTQMT8EIhwgX33JUYEdcx2kL5qBtGAS6xHzfRXUaztC10R9IIJ16V0TUqQZIpyQvDTKZvgKaugPQeZXuMLbDnbeja6sq6pgOND"
 
-# DEFAULT_CLIENT_ID = "t9A23Ti5Upx5GFtiodVnqJAJ4DAgxxwNBef74aNH"
-# DEFAULT_CLIENT_SECRET = "Bk6pC1ri20QQ9X44ZuN3wlKTRLFc4eMlLFYoTubiRBNcLUJ2U70ewemjOBye2R1NYE46bJ2Sc6eGCnLspIt4U8J0NHQyqKXP90esCBRduHdFEyWiI6wI7ghkfLpYKbuY"
+DEFAULT_CLIENT_ID = "t9A23Ti5Upx5GFtiodVnqJAJ4DAgxxwNBef74aNH"
+DEFAULT_CLIENT_SECRET = "Bk6pC1ri20QQ9X44ZuN3wlKTRLFc4eMlLFYoTubiRBNcLUJ2U70ewemjOBye2R1NYE46bJ2Sc6eGCnLspIt4U8J0NHQyqKXP90esCBRduHdFEyWiI6wI7ghkfLpYKbuY"
 
 
 OAUTH2_PROVIDER = {
@@ -231,28 +231,28 @@ WSGI_APPLICATION = "DIY_Dashboard.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diy_erp_company',
-        'USER': 'myuser',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB_NAME'),
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('POSTGRES_HOST'),
+#         'NAME': 'diy_erp_company',
+#         'USER': 'myuser',
+#         'PASSWORD': '123456',
+#         'HOST': 'localhost',
 #         'PORT': '5432',
 #     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': '5432',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
