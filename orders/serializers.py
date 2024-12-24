@@ -9,7 +9,8 @@ class SalesOrderLineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SalesOrderLine
-        fields = ['product', 'quantity']
+        fields = ['product', 'quantity', 'unit_price', 'line_total']
+        read_only_fields = ['unit_price', 'line_total']
 
 class SalesOrderSerializer(serializers.ModelSerializer):
     client = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all())
@@ -30,8 +31,12 @@ class SalesOrderSerializer(serializers.ModelSerializer):
             product = order_line_data['product']
             quantity = order_line_data['quantity']
 
-            # Lấy giá bán của sản phẩm
-            unit_price = product.selling_price
+            # Kiểm tra giá bán sản phẩm
+            try:
+                unit_price = product.selling_price
+            except AttributeError:
+                raise serializers.ValidationError(f"Product {product.id} does not have a valid selling price.")
+
             line_total = unit_price * quantity
 
             SalesOrderLine.objects.create(

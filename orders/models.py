@@ -26,8 +26,9 @@ class SalesOrder(models.Model):
 
 
 class SalesOrderLine(models.Model):
-    id = models.AutoField(primary_key=True)
-    sales_order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, related_name='order_lines')
+    sales_order = models.ForeignKey(
+        SalesOrder, on_delete=models.CASCADE, related_name='order_lines'
+    )
     product = models.ForeignKey(FinishedProducts, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -35,12 +36,12 @@ class SalesOrderLine(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        # Tính line_total khi tạo SalesOrderLine
         self.line_total = self.quantity * self.unit_price
-        super(SalesOrderLine, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
-        # Cập nhật lại total_amount của SalesOrder sau khi thêm một line
-        self.sales_order.update_total_amount()
+        # Cập nhật lại total_amount của SalesOrder
+        if self.sales_order:
+            self.sales_order.update_total_amount()
 
     def __str__(self):
         return f"Line for Order {self.sales_order.order_number} - Product: {self.product}"

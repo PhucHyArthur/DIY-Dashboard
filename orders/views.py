@@ -56,13 +56,6 @@ class SalesOrderViewSet(ScopedModelViewSet):
         serializer.is_valid(raise_exception=True)
         sales_order = serializer.save()
 
-        # Xử lý các dòng order_lines nếu có
-        order_lines_data = request.data.get('order_lines', [])
-        for order_line_data in order_lines_data:
-            order_line_serializer = SalesOrderLineSerializer(data=order_line_data)
-            order_line_serializer.is_valid(raise_exception=True)
-            order_line_serializer.save(sales_order=sales_order)
-
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
