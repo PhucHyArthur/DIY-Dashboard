@@ -11,6 +11,7 @@ class RawMaterials(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    unit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_quantity = models.IntegerField(default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)

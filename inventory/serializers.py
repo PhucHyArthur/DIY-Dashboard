@@ -30,7 +30,7 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
         model = RawMaterialsLine
         fields = [
             'id', 'quantity', 'supplier_id', 'supplier_name', 
-            'price_per_unit', 'line_total', 'rack', 'bin_number',
+            'price_per_unit', 'line_total', 'rack', 'bin_number', 'unit',
             'created_at', 'is_deleted', 'is_available', 'raw_material_id'
         ]
         read_only_fields = ['line_total', 'created_at']
