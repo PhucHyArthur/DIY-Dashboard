@@ -79,7 +79,17 @@ class PaymentReturnView(APIView):
         # Xác thực chữ ký bảo mật
         if vnpay.validate_response(settings.VNPAY['vnp_HashSecret']):
             if vnp_ResponseCode == "00":
-                # Giao dịch thành công
+                # Giao dịch thành công, cập nhật trạng thái trong cơ sở dữ liệu
+                try:
+                    payment = Payment.objects.get(order_id=order_id)
+                    payment.status = "successfull"
+                    payment.vnp_TransactionNo = vnp_TransactionNo
+                    payment.vnp_ResponseCode = vnp_ResponseCode
+                    payment.vnp_PayDate = vnp_PayDate
+                    payment.save()
+                except Payment.DoesNotExist:
+                    return Response({"error": "Order ID không tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
+
                 return Response({
                     "title": "Kết quả thanh toán",
                     "result": "Thành công",
