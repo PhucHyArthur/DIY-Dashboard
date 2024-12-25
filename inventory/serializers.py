@@ -2,20 +2,8 @@ from rest_framework import serializers
 
 from suppliers.models import Suppliers
 from .models import RawMaterials, RawMaterialsLine, FinishedProducts, Image
-from warehouse.models import Location
+from warehouse.models import Rack
 from cloudinary.uploader import upload
-from rest_framework.exceptions import ValidationError
-import base64
-from django.core.files.base import ContentFile
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = ['id', 'rack', 'bin_number', 'description', 'quantity', 'is_deleted', 'is_fulled']
-        ref_name = 'WarehouseLocation'
-
-
 
 class ImageSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
@@ -33,7 +21,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class RawMaterialsLineSerializer(serializers.ModelSerializer):
-    location = LocationSerializer()
+    rack = serializers.PrimaryKeyRelatedField(queryset=Rack.objects.all(), required=False)
     supplier_id = serializers.IntegerField(write_only=True)  
     supplier_name = serializers.CharField(source='supplier.name', read_only=True) 
     raw_material_id = serializers.IntegerField(write_only=True)
@@ -42,7 +30,7 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
         model = RawMaterialsLine
         fields = [
             'id', 'quantity', 'supplier_id', 'supplier_name', 
-            'price_per_unit', 'line_total', 'location',
+            'price_per_unit', 'line_total', 'rack', 'bin_number',
             'created_at', 'is_deleted', 'is_available', 'raw_material_id'
         ]
         read_only_fields = ['line_total', 'created_at']
@@ -51,14 +39,8 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
         """
         Custom create method để xử lý nested location, supplier_id và raw_material_id.
         """
-        location_data = validated_data.pop('location', None)
         raw_material_id = validated_data.pop('raw_material_id', None)
         supplier_id = validated_data.pop('supplier_id', None)
-
-        # Xử lý location
-        if location_data:
-            location, created = Location.objects.get_or_create(**location_data)
-            validated_data['location'] = location
 
         # Liên kết RawMaterial
         try:
@@ -81,20 +63,8 @@ class RawMaterialsLineSerializer(serializers.ModelSerializer):
         """
         Custom update method để xử lý nested location, supplier_id và raw_material_id.
         """
-        location_data = validated_data.pop('location', None)
         raw_material_id = validated_data.pop('raw_material_id', None)
         supplier_id = validated_data.pop('supplier_id', None)
-
-        # Xử lý location
-        if location_data:
-            location = instance.location
-            if location:  # Nếu location đã tồn tại, cập nhật
-                for attr, value in location_data.items():
-                    setattr(location, attr, value)
-                location.save()
-            else:  # Nếu chưa có location, tạo mới
-                location = Location.objects.create(**location_data)
-                instance.location = location
 
         # Liên kết RawMaterial
         if raw_material_id:
@@ -175,7 +145,7 @@ class RawMaterialsSerializer(serializers.ModelSerializer):
         return instance
 
 class FinishedProductsSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(required=False)
+    rack = serializers.PrimaryKeyRelatedField(queryset=Rack.objects.all(), required=False)
     images = ImageSerializer(many=True, read_only=True)  # Trả về danh sách URL ảnh
     uploaded_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False
@@ -185,7 +155,7 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         model = FinishedProducts
         fields = [
             'id', 'name', 'category', 'selling_price', 'total_quantity',
-            'unit', 'location', 'description', 'expired_date',
+            'unit', 'rack', 'bin_number', 'description', 'expired_date',
             'is_available', 'is_deleted', 'created_at', 'updated_at',
             'images', 'uploaded_images'
         ]
@@ -200,12 +170,6 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         Tạo mới sản phẩm và upload các ảnh từ uploaded_images.
         """
         uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh
-        location_data = validated_data.pop('location', None)  # Xử lý location
-
-        # Xử lý location nếu có
-        if location_data:
-            location, created = Location.objects.get_or_create(**location_data)
-            validated_data['location'] = location
 
         # Tạo mới FinishedProducts
         finished_product = FinishedProducts.objects.create(**validated_data)
@@ -228,18 +192,6 @@ class FinishedProductsSerializer(serializers.ModelSerializer):
         Cập nhật sản phẩm và upload các ảnh từ uploaded_images.
         """
         uploaded_images = validated_data.pop('uploaded_images', [])  # Lấy danh sách ảnh
-        location_data = validated_data.pop('location', None)  # Xử lý location
-
-        # Cập nhật location nếu có
-        if location_data:
-            location = instance.location
-            if location:
-                for attr, value in location_data.items():
-                    setattr(location, attr, value)
-                location.save()
-            else:
-                location, created = Location.objects.get_or_create(**location_data)
-                instance.location = location
 
         # Cập nhật các trường thông tin sản phẩm
         for attr, value in validated_data.items():

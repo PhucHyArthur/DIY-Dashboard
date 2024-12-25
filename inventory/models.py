@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 from suppliers.models import Suppliers
-from warehouse.models import Location
+from warehouse.models import Rack
 from django.utils.timezone import now
 from cloudinary.models import CloudinaryField
 
@@ -48,13 +48,14 @@ class RawMaterialsLine(models.Model):
         related_name="raw_materials_lines", 
         blank=False
     )
-    location = models.ForeignKey(
-        Location, 
+    rack = models.ForeignKey(
+        Rack, 
         on_delete=models.CASCADE, 
         related_name="raw_materials_lines", 
         blank=True, 
         null=True
     )
+    bin_number = models.CharField(max_length=255, blank=True, null=True)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
     line_total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -81,7 +82,8 @@ class FinishedProducts(models.Model):
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
     total_quantity = models.IntegerField(default=0)
     unit = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="finished_products", blank=True, null=True)
+    rack = models.ForeignKey(Rack, on_delete=models.CASCADE, related_name="finished_products", blank=True, null=True)
+    bin_number = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     expired_date = models.DateField(_("Expiry Date"))
     is_available = models.BooleanField(_("Is Available"), default=True)
